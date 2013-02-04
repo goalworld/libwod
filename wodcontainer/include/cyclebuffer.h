@@ -8,29 +8,29 @@
 #ifndef CYCLE_BUFFER_H_
 #define CYCLE_BUFFER_H_
 #include <stdbool.h>
-typedef struct cycle_buffer_s
+struct wcCycleBuf
 {
 	char *buf;
 	int cap;
 	int head;
 	int tail;
-}cycle_buffer_t;
-typedef struct cycle_pair_s
+};
+struct wcCyclePair
 {
 	struct {
 		void *buf;
 		int sz;
 	}first,second;
-}cycle_pair_t;
-int wcCycleBufInit( cycle_buffer_t* cycle,int defsize);
-void wcCycleBufDestroy( cycle_buffer_t* cycle );
+};
+int wcCycleBufInit( struct wcCycleBuf* cycle,int defsize);
+void wcCycleBufDestroy( struct wcCycleBuf* cycle );
 //growsz =0 剩下的空间（除了tail标记的）都将被设置为使用
-int wcCycleBufGrow(cycle_buffer_t* cycle,int growsz,cycle_pair_t *pair);
-void wcCycleBufBack(cycle_buffer_t* cycle,int backsz);
-int wcCycleBufPush(cycle_buffer_t* cycle,void *buf,int sz);
-void wcCycleBufPop(cycle_buffer_t* cycle,int sz);
-int wcCycleBufUsed(cycle_buffer_t* cycle,cycle_pair_t * pair);
+int wcCycleBufGrow(struct wcCycleBuf* cycle,int growsz,struct wcCyclePair *pair);
+void wcCycleBufBack(struct wcCycleBuf* cycle,int backsz);
+int wcCycleBufPush(struct wcCycleBuf* cycle,void *buf,int sz);
+void wcCycleBufPop(struct wcCycleBuf* cycle,int sz);
+int wcCycleBufUsed(struct wcCycleBuf* cycle,struct wcCyclePair * pair);
 
 
-bool wcCycleBufEmpty( cycle_buffer_t* cycle );
+bool wcCycleBufEmpty( struct wcCycleBuf* cycle );
 #endif /* CYCLE_BUFFER_H_ */
