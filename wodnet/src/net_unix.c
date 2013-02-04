@@ -213,7 +213,7 @@ wnSetNonBlock(wnFd fd,int flag)
 	if(flag){
 		oflag |= O_NONBLOCK;
 	}else{
-		oflag &= ~O_NONBLOCK;
+		oflag &= (~O_NONBLOCK);
 	}
     
     if( fcntl(fd, F_SETFL, oflag) < 0){

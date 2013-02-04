@@ -54,9 +54,11 @@ selectRemove(struct wvLoop *loop , int fd,int mask)
 	FD_CLR(fd,&p->rset);
 	if( mask & WV_IO_READ )FD_SET(fd,&p->rset);
 	if( mask & WV_IO_WRITE )FD_SET(fd,&p->wset);
-	if( mask == WV_NONE){
-		if(fd == p->maxfd){
-			p->maxfd = fd;
+	if( mask == WV_NONE && fd == p->maxfd){
+		int i = p->maxfd;
+		for(;i >=0 ;i--){
+			struct wvIO * pio = &loop->files[i];
+			if(pio->event != WV_NONE) p->maxfd = pio->fd;
 		}
 	}
 	return WV_ROK;
@@ -68,30 +70,22 @@ selectPoll(struct wvLoop *loop,double timeOut)
 	fd_set rset,wset;
 	rset = p->rset;
 	wset = p->wset;
+	int max = p->maxfd + 1,i=0,numele=0;
 	struct timeval tv;
 	tv.tv_sec = timeOut;
 	tv.tv_usec = (timeOut - tv.tv_sec) * 1E6;
-	int ret = select(p->maxfd+1,&rset,&wset,NULL,&tv);
+	int ret = select(max,&rset,&wset,NULL,&tv);
 	switch (ret){
-	case 0:
-		return 0;
-	case -1:
-		return -errno;
-	default:
-		break;
+	case 0:return 0;
+	case -1:return -errno;
 	}
-	int i = 0;
-	int * pPendFd = loop->pendFds;
-	for(;i < loop->set_size;i++){
+	for(;i < max;i++){
 		struct wvIO * pio = &loop->files[i];
-		if(pio->event != WV_NONE){
-			pio->revent = WV_NONE;
-			if(FD_ISSET(pio->fd,&rset))pio->revent |= WV_IO_READ;
-			if(FD_ISSET(pio->fd,&wset))pio->revent |= WV_IO_WRITE;
-			if( pio->revent != WV_NONE){
-				*pPendFd = pio->fd;pPendFd ++;
-			}
-		}
+		if(pio->event == WV_NONE) continue;
+		pio->revent = WV_NONE;
+		if(pio->event& WV_IO_READ && FD_ISSET(pio->fd,&rset))	pio->revent |= WV_IO_READ;
+		if(pio->event& WV_IO_WRITE && FD_ISSET(pio->fd,&wset))	pio->revent |= WV_IO_WRITE;
+		if(pio->revent != WV_NONE) 		loop->pendFds[numele++] = pio->fd;
 	}
-	return ret;
+	return numele;
 }

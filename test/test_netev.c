@@ -2,6 +2,7 @@
 #include <wod/ev.h>
 #include <string.h>
 #include <stdio.h>
+#include <errno.h>
 #define BUF_SZ 1024
 static void _doAccept(void * nv,int mask);
 static void _doRead(void * nv,int mask);
@@ -30,9 +31,16 @@ _doAccept(void * nv,int mask)
 {
 	wnFd fd = (wnFd)(long)(nv);
 	wnFd cfd = wnAccept(fd);
-	printf("%d\n",fd);
-	if(cfd > 0)
+	printf("Connected : %d\n",cfd );
+	if(cfd > 0){
 		wvIOAdd(loop,cfd,WV_IO_READ,_doRead,(void *)(cfd));
+	}else if(cfd < 0 && -cfd == EAGAIN){
+		if(-cfd == EAGAIN){
+			perror("wnAccept00000000000");
+		}else{
+			perror("wnAccept");
+		}
+	}
 }
 static void 
 _doRead(void * nv,int mask)
@@ -46,5 +54,5 @@ _doRead(void * nv,int mask)
 		return;
 	}
 	buf[nr] = 0;
-	printf("%s\n", buf+4);
+	//printf("%s\n", buf+4);
 }
