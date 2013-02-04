@@ -22,8 +22,8 @@ typedef struct cycle_pair_s
 		int sz;
 	}first,second;
 }cycle_pair_t;
-int wcCycleBufNew( cycle_buffer_t* cycle,int defsize);
-void wcCycleBufDel( cycle_buffer_t* cycle );
+int wcCycleBufInit( cycle_buffer_t* cycle,int defsize);
+void wcCycleBufDestroy( cycle_buffer_t* cycle );
 //growsz =0 剩下的空间（除了tail标记的）都将被设置为使用
 int wcCycleBufGrow(cycle_buffer_t* cycle,int growsz,cycle_pair_t *pair);
 void wcCycleBufBack(cycle_buffer_t* cycle,int backsz);

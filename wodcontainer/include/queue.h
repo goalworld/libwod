@@ -17,9 +17,9 @@ typedef struct wcQueue
 	int q_elemsize;
 }wcQueue;
 typedef void wcQueueElemDelFn(void *elem);
-int 		wcQueueNew	(wcQueue *que,unsigned elemsize);
-void 		wcQueueDel	(wcQueue *que,wcQueueElemDelFn fn);
-void 		wcQueuePush	(wcQueue * que,void *elem);
-int 		wcQueuePop	(wcQueue * que,void *elem);
-unsigned 	wcQueueSize	( wcQueue * que );
+int 		wcQueueInit		(wcQueue *que, unsigned elemsize);
+void 		wcQueueDestroy	(wcQueue *que, wcQueueElemDelFn fn);
+void 		wcQueuePush		(wcQueue *que, void *elem);
+int 		wcQueuePop		(wcQueue *que, void *elem);
+unsigned 	wcQueueSize		(wcQueue *que );
 #endif /* RAIN_QUEUE_H_ */

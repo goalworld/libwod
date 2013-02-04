@@ -13,7 +13,7 @@
 #include <memory.h>
 #define BUF_SZ 64
 int
-wcQueueNew(wcQueue *que,unsigned elemsize)
+wcQueueInit(wcQueue *que,unsigned elemsize)
 {
 	assert(que);
 	que->q_buf = malloc(BUF_SZ * elemsize);
@@ -27,7 +27,7 @@ wcQueueNew(wcQueue *que,unsigned elemsize)
 	return 0;
 }
 void
-wcQueueDel(wcQueue *que,wcQueueElemDelFn del_fn){
+wcQueueDestroy(wcQueue *que,wcQueueElemDelFn del_fn){
 	assert(que);
 	if(del_fn){
 		int cut = que->q_cut;

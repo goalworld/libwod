@@ -18,13 +18,13 @@ struct wcArray
 	int cut_sz;
 };
 
-void wcArrayNew(wcArray *arr,int elemsz);
-void wcArrayDel(wcArray *arr);
+void wcArrayInit(wcArray *arr,int elemsz);
+void wcArrayDestroy(wcArray *arr);
 void wcArrayPush(wcArray *arr,void *elem);
 void wcArrayAt(wcArray *arr,int index,void *elem);
 void wcArraySet(wcArray *arr,int index,void *elem);
 void wcArrayUnShift(wcArray *arr,void *elem);
 void wcArrayErase(wcArray *arr,int index,int numelem,void *elem);
 void wcArrayInsert(wcArray *arr,int index,void *elem,int numelem);
-int wcArraySize(wcArray *arr);
+unsigned wcArraySize(wcArray *arr);
 #endif /* RAIN_ARRAY_H_ */

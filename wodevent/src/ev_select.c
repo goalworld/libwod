@@ -34,14 +34,13 @@ selectDel(struct wvLoop *loop)
 static int
 selectAdd(struct wvLoop *loop,int fd,int mask)
 {
-
 	selectData * p = (selectData *)loop->pollorData;
 	if(fd > p->maxfd){
 		p->maxfd = fd;
 	}
 	mask |=loop->files[fd].event;
 	FD_CLR(fd,&p->rset);
-	FD_CLR(fd,&p->rset);
+	FD_CLR(fd,&p->wset);
 	if( mask & WV_IO_READ )FD_SET(fd,&p->rset);
 	if( mask & WV_IO_WRITE )FD_SET(fd,&p->wset);
 	return WV_ROK;
@@ -71,8 +70,8 @@ selectPoll(struct wvLoop *loop,double timeOut)
 	wset = p->wset;
 	struct timeval tv;
 	tv.tv_sec = timeOut;
-	tv.tv_usec = (timeOut - tv.tv_sec) * 1000000;
-	int ret = select(p->maxfd,&rset,&wset,NULL,&tv);
+	tv.tv_usec = (timeOut - tv.tv_sec) * 1E6;
+	int ret = select(p->maxfd+1,&rset,&wset,NULL,&tv);
 	switch (ret){
 	case 0:
 		return 0;
@@ -89,7 +88,9 @@ selectPoll(struct wvLoop *loop,double timeOut)
 			pio->revent = WV_NONE;
 			if(FD_ISSET(pio->fd,&rset))pio->revent |= WV_IO_READ;
 			if(FD_ISSET(pio->fd,&wset))pio->revent |= WV_IO_WRITE;
-			*pPendFd = pio->fd;pPendFd ++;
+			if( pio->revent != WV_NONE){
+				*pPendFd = pio->fd;pPendFd ++;
+			}
 		}
 	}
 	return ret;

@@ -11,7 +11,7 @@
 #include <string.h>
 #include <stdlib.h>
 void
-wcArrayNew(wcArray *arr,int elemsz)
+wcArrayInit(wcArray *arr,int elemsz)
 {
 	assert(arr);
 	arr->elem_sz = elemsz;
@@ -36,7 +36,7 @@ _add_size(wcArray *arr,int elem)
 	}
 }
 void
-wcArrayDel(wcArray *arr)
+wcArrayDestroy(wcArray *arr)
 {
 	assert(arr);
 	free(arr->arr_data);
@@ -56,14 +56,14 @@ wcArrayAt(wcArray *arr,int index,void *elem)
 {
 	assert(arr && index<=arr->arr_sz);
 	memcpy(elem,
-			(char*)(arr->arr_data)+arr->cut_sz*index,
+			(char*)(arr->arr_data)+arr->elem_sz*index,
 			arr->elem_sz);
 }
 void
 wcArraySet(wcArray *arr,int index,void *elem)
 {
 	assert(arr && index<=arr->arr_sz);
-	memcpy((char*)(arr->arr_data)+arr->cut_sz*index,
+	memcpy((char*)(arr->arr_data)+arr->elem_sz*index,
 			elem,
 			arr->elem_sz);
 }
@@ -104,7 +104,7 @@ wcArrayInsert(wcArray *arr,int index,void *elem,int numelem)
 			numelem*arr->elem_sz);
 	arr->cut_sz+=numelem;
 }
-int
+unsigned
 wcArraySize(wcArray *arr)
 {
 	assert(arr);

@@ -11,7 +11,7 @@
 static int _resize_byuse(cycle_buffer_t* cycle,int usesz);
 static int 	_get_free_sz(cycle_buffer_t* cycle);
 int
-wcCycleBufNew( cycle_buffer_t* cycle,int defsize)
+wcCycleBufInit( cycle_buffer_t* cycle,int defsize)
 {
 	if(!cycle || defsize <= 0){
 		return -1;
@@ -129,7 +129,7 @@ wcCycleBufBack(cycle_buffer_t* cycle,int backsz)
 	}
 }
 void
-wcCycleBufDel( cycle_buffer_t* cycle )
+wcCycleBufDestroy( cycle_buffer_t* cycle )
 {
 	free(cycle->buf);
 }

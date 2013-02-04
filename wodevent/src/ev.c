@@ -39,7 +39,7 @@ struct wvLoop * wvLoopNew(int set_size,int type){
 		return NULL;
 	}
 	ret = loop->pollor.New(loop,0);
-	if(ret == WV_ROK){
+	if(ret != WV_ROK){
 		free(loop);
 		return NULL;
 	}
@@ -153,7 +153,7 @@ void wvStop(struct wvLoop *loop){
 }
 
 int wvIOAdd(struct wvLoop *loop,int fd,int event,wvIOFn cb,void *cbArg){
-	if(fd > loop->set_size || !cb){
+	if(fd > loop->set_size || fd <= 0 || !cb){
 		return -EINVAL;
 	}
 	struct wvIO *pFile = &loop->files[fd];
@@ -182,7 +182,7 @@ void wvIORemove(struct wvLoop *loop,int id,int event){
 		return ;
 	}
 	struct wvIO *pFile = &loop->files[id];
-	if(pFile->event & event){//存在该事件
+	if(pFile->event & event){
 		loop->pollor.Remove(loop,pFile->fd,event);
 		pFile->event &= (~event);
 		if(pFile->event == WV_NONE){
