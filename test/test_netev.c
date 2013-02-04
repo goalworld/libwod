@@ -31,8 +31,9 @@ _doAccept(void * nv,int mask)
 {
 	wnFd fd = (wnFd)(long)(nv);
 	wnFd cfd = wnAccept(fd);
-	printf("Connected : %d\n",cfd );
+	
 	if(cfd > 0){
+		printf("Connected : fd%d\n",cfd );
 		wvIOAdd(loop,cfd,WV_IO_READ,_doRead,(void *)(cfd));
 	}else if(cfd < 0 && -cfd == EAGAIN){
 		if(-cfd == EAGAIN){
