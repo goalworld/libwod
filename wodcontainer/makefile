@@ -11,14 +11,14 @@ SHARED = -fPIC -shared
 SRCS= ./src/array.c \
 			./src/queue.c \
 			./src/cyclebuffer.c
-all:$(BUILD)libwodcontainer.so \
+all:$(BUILD)libwct.so \
 	$(BUILD)test_arr
 
-$(BUILD)libwodcontainer.so: $(SRCS)
+$(BUILD)libwct.so: $(SRCS)
 	$(CC) $(CCFLAGS) $(INCLUDE_DIR) $(SHARED) -o $@ $^
 
 $(BUILD)test_arr: ./test/array_test.c
-	$(CC) $(CCFLAGS) $(INCLUDE_DIR) -o $@ $^ $(BUILD)libwodcontainer.so
+	$(CC) $(CCFLAGS) $(INCLUDE_DIR) -o $@ $^ $(BUILD)libwct.so
 
 clean:
-	rm $(BUILD)libwodcontainer.so $(BUILD)test_arr
+	rm $(BUILD)libwct.so $(BUILD)test_arr

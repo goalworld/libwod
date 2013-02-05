@@ -54,7 +54,7 @@ wcArrayPush(wcArray *arr,void *elem)
 void
 wcArrayAt(wcArray *arr,int index,void *elem)
 {
-	assert(arr && index<=arr->arr_sz);
+	assert(arr && index<arr->cut_sz);
 	memcpy(elem,
 			(char*)(arr->arr_data)+arr->elem_sz*index,
 			arr->elem_sz);
@@ -62,7 +62,7 @@ wcArrayAt(wcArray *arr,int index,void *elem)
 void
 wcArraySet(wcArray *arr,int index,void *elem)
 {
-	assert(arr && index<=arr->arr_sz);
+	assert(arr && index<=arr->cut_sz);
 	memcpy((char*)(arr->arr_data)+arr->elem_sz*index,
 			elem,
 			arr->elem_sz);
@@ -80,7 +80,7 @@ wcArrayUnShift(wcArray *arr,void *elem)
 void
 wcArrayErase(wcArray *arr,int index,int numelem,void *elem)
 {
-	assert(arr && index<=arr->arr_sz);
+	assert(arr && index<=arr->cut_sz && numelem <= arr->cut_sz-index);
 	if(elem){
 		memcpy(elem,
 				(char*)(arr->arr_data) + (index)*arr->elem_sz,
@@ -94,7 +94,7 @@ wcArrayErase(wcArray *arr,int index,int numelem,void *elem)
 void
 wcArrayInsert(wcArray *arr,int index,void *elem,int numelem)
 {
-	assert(arr && index<=arr->arr_sz);
+	assert(arr && index<=arr->cut_sz);
 	_add_size(arr,arr->cut_sz+numelem);
 	memmove((char*)(arr->arr_data) + (index+numelem)*arr->elem_sz,
 			(char*)(arr->arr_data) + (index)*arr->elem_sz,

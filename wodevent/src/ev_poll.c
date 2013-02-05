@@ -68,7 +68,6 @@ pollRemove(struct wvLoop *loop , int fd,int mask)
 {
 	struct pollData * p = (struct pollData *)loop->pollorData;
 	mask =(loop->files[fd].event & (~mask));
-	mask |=loop->files[fd].event;
 	struct pollfd cut;
 	int ids = p->fdmap[fd];
 	if(ids >=0 ){

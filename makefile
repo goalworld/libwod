@@ -12,4 +12,4 @@ install:
 clean:
 	rm $(BUILD)*
 $(BUILD)test_netev:./test/test_netev.c
-	gcc -o $@ $^ $(BUILD)libwodevent.so  $(BUILD)libwodnet.so 
+	gcc -o $@ $^ $(BUILD)libwev.so  $(BUILD)libwnet.so 

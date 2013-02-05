@@ -38,14 +38,16 @@ struct wvLoop * wvLoopNew(int set_size,int type){
 		free(loop);
 		return NULL;
 	}
+	loop->set_size = set_size;
+	loop->idIndex = loop->set_size;
+	loop->userdefHead = NULL;
 	ret = loop->pollor.New(loop,0);
 	if(ret != WV_ROK){
 		free(loop);
 		return NULL;
 	}
-	loop->set_size = set_size;
-	loop->idIndex = loop->set_size;
-	loop->userdefHead = NULL;
+	
+	
 	loop->files = malloc(sizeof(struct wvIO) *set_size);
 	loop->pendFds = malloc(sizeof(int) *set_size);
 	int i=0;
