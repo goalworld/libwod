@@ -94,7 +94,6 @@ pollPoll(struct wvLoop *loop,double timeOut)
 	memcpy( pfds,wcArrayGetBuffer(&p->arr),sizeof(struct pollfd)*sz);
 
 	int ret = poll(pfds,sz, timeOut*1E3);
-	printf(" pollPoll %d %d %d %d\n",ret,sz,pfds[0].fd,pfds[0].events );
 	int numelm = 0;
 	if(ret > 0){
 		struct wvIO * pio;
