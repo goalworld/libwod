@@ -243,11 +243,15 @@ void wvUserDefRemove(struct wvLoop *loop,int id){
 }
 
 #define HAS_SELECT 1
+#define HAS_POLL 1
 #if HAS_EPOLL
 #include "ev_epoll.c"
 #endif
 #if HAS_SELECT
 #include "ev_select.c"
+#endif
+#if HAS_POLL
+#include "ev_poll.c"
 #endif
 static int _initPollor(struct wvPoller* pllor,int type){
 	if(type == WV_POLL_EPOLL){
@@ -259,6 +263,12 @@ static int _initPollor(struct wvPoller* pllor,int type){
 	}else if(type == WV_POLL_SELECT){
 #if HAS_SELECT
 		SET_POLLER(poller,select);
+		return WV_ROK;
+#endif
+		return -EINVAL;
+	}else if(type == WV_POLL_POLL){
+#if HAS_POLL
+		SET_POLLER(poller,poll);
 		return WV_ROK;
 #endif
 		return -EINVAL;

@@ -20,6 +20,7 @@ enum{
 enum{
 	WV_POLL_EPOLL,
 	WV_POLL_SELECT,
+	WV_POLL_POLL,
 	WV_POLL_KQUEUE
 };
 typedef void (*wvIOFn)(void * nv,int mask);

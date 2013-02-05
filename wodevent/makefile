@@ -7,6 +7,6 @@ WDNET_SRCS= ./src/ev.c
 
 all:$(BUILD)libwodevent.so 
 $(BUILD)libwodevent.so: $(WDNET_SRCS)
-	$(CC) $(CCFLAGS) $(INCLUDE_DIR) $(SHARED) -o $@ $^
+	$(CC) $(CCFLAGS) $(INCLUDE_DIR) $(SHARED) -o $@ $^ $(BUILD)libwodcontainer.so
 clean:
 	rm $(BUILD)*

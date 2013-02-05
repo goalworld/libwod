@@ -10,7 +10,7 @@ struct wvLoop *loop;
 int 
 main(int argc, char const *argv[])
 {
-	loop = wvLoopNew(10240,WV_POLL_SELECT);
+	loop = wvLoopNew(10240,WV_POLL_POLL);
 	if( !loop ){
 		printf("%s\n", "loop create error" );
 		return 1;

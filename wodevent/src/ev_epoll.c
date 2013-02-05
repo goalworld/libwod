@@ -84,7 +84,7 @@ epollPoll(struct wvLoop *loop,double timeOut)
 		int * pPendFd = loop->pendFds;
 		for(;tmp>0;tmp--){
 			loop->files[epEv->data.fd].revent = epEv->events & ( EPOLLIN | EPOLLHUP | EPOLLERR ) ? WV_IO_READ:0
-											|( epEv->events & ( EPOLLIN | EPOLLHUP | EPOLLERR ) ) ? WV_IO_WRITE:0;
+											|( epEv->events & ( EPOLLOUT | EPOLLHUP | EPOLLERR ) ) ? WV_IO_WRITE:0;
 			epEv++;
 			*(pPendFd++) = epEv->data.fd;
 		}

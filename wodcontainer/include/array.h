@@ -17,7 +17,7 @@ struct wcArray
 	int arr_sz;
 	int cut_sz;
 };
-
+#define wcArrayGetBuffer(parr) ((parr)->arr_data)
 void wcArrayInit(wcArray *arr,int elemsz);
 void wcArrayDestroy(wcArray *arr);
 void wcArrayPush(wcArray *arr,void *elem);
