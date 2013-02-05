@@ -8,9 +8,9 @@ deps:
 install:
 	mkdir -p /usr/include/wod
 	cp ./wodnet/include/* ./wodevent/include/* ./wodcontainer/include/* /usr/include/wod
-	ln -s /lib/libwnet.so.0.0.1 ./build/libwnet.so 
-	ln -s /lib/libwct.so.0.0.1 ./build/libwct.so 
-	ln -s /lib/libwev.so.0.0.1 ./build/libwev.so 
+	ln -s  ./build/libwnet.so /lib/libwnet.so.0.0.1
+	ln -s  ./build/libwct.so /lib/libwct.so.0.0.1
+	ln -s  ./build/libwev.so /lib/libwev.so.0.0.1
 clean:
 	rm $(BUILD)*
 $(BUILD)test_netev:./test/test_netev.c

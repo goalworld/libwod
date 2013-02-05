@@ -14,11 +14,11 @@ int main(int argc, char const *argv[])
 		}else{
 			wcArrayUnShift(&arr,&i);
 		}
-		
+		printf(" size %d\n", wcArraySize(&arr));
 	}
 	for( i=0;i< 10000;i++){
 		wcArrayAt(&arr,i,&j);
-		printf("%d\n", j);
+		printf("[%d:%d]\n", i,j);
 	}
 	return 0;
 }
