@@ -5,7 +5,7 @@
 
 
 static struct wcHashMapTable *  _hmtNew(unsigned key,unsigned sz);
-static void _hmtDelete(struct wcHashMapTable * hmt);
+static void _hmtDelete(struct wcHashMap * hm,struct wcHashMapTable * hmt);
 static void  _hmtReHash(struct wcHashMap * hm,int index);
 static void _hmtDetach(struct wcHashMap *hm,int lindex,int rindex);
 static struct wcHashMapEntry *  _hmtRemove(struct wcHashMap * hm,int lindex,unsigned key);
@@ -36,7 +36,7 @@ wcHashMapDelete(struct wcHashMap * hm)
 {
 	int i = 0;
 	for(;i<hm->tblen;i++){
-		_hmtDelete(hm->tbs[i]);
+		_hmtDelete(hm,hm->tbs[i]);
 	}
 	free(hm->tbs);
 	free(hm);
@@ -45,8 +45,8 @@ int
 wcHashMapInsert(struct wcHashMap * hm,const void *key,const void *value)
 {
 	struct wcHashMapEntry * entry = malloc(sizeof(struct wcHashMapEntry));
-	entry->kv.key = key;
-	entry->kv.value = value;
+	entry->kv.key =   hm->ktype.keyClone   ? hm->ktype.keyClone(hm->ktenv,key):key;
+	entry->kv.value = hm->ktype.valueClone ? hm->ktype.valueClone(hm->ktenv,value):value;
 	entry->tkey = hm->ktype.hashFunc(hm->ktenv,key);
 	entry->next = NULL;
 	int i=0;
@@ -57,7 +57,7 @@ wcHashMapInsert(struct wcHashMap * hm,const void *key,const void *value)
 	}
 	return 0;
 }
-void *
+const void *
 wcHashMapQuery(struct wcHashMap *hm,const void *key)
 {
 	struct wcHashMapEntry * entry;
@@ -69,20 +69,23 @@ wcHashMapQuery(struct wcHashMap *hm,const void *key)
 			break;
 		}
 	}
-	return entry?entry->kv.value:NULL;
+	if(entry->kv.value){
+		return hm->ktype.valueClone ? hm->ktype.valueClone(hm->ktenv,entry->kv.value):entry->kv.value;
+	}
+	return NULL;
 }
-void *
+const void *
 wcHashMapRemove(struct wcHashMap *hm,const void *key)
 {
 	struct wcHashMapEntry * entry;
 	unsigned tkey = hm->ktype.hashFunc(hm->ktenv,key);
 	int i=0;
-	void *value = NULL;
+	const void *value = NULL;
 	for(;i<hm->tblen;i++){
 		if(tkey <= hm->tbs[i]->hashkey){
 			entry = _hmtRemove(hm,i,tkey);
 			if(entry){
-				value = entry->kv.value;
+				value = hm->ktype.valueClone ? hm->ktype.valueClone(hm->ktenv,entry->kv.value):entry->kv.value;
 				free(entry);
 			}
 			break;
@@ -108,7 +111,7 @@ _hmtNew(unsigned key,unsigned sz)
 	return hmt;
 }
 static void
-_hmtDelete(struct wcHashMapTable * hmt)
+_hmtDelete(struct wcHashMap *hm,struct wcHashMapTable * hmt)
 {
 	int i=0;
 	struct wcHashMapEntry *tmp,*cut;
@@ -116,6 +119,8 @@ _hmtDelete(struct wcHashMapTable * hmt)
 		cut = hmt->etys[i];
 		while(cut){
 			tmp = cut->next;
+			if(hm->ktype.keyDestroy)hm->ktype.keyDestroy(hm->ktenv,cut->kv.key);
+			if(hm->ktype.keyDestroy)hm->ktype.valueDestroy(hm->ktenv,cut->kv.value);
 			free(cut);
 			cut = tmp;
 		}
