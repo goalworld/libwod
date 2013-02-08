@@ -30,7 +30,7 @@ int main(int argc, char const *argv[])
 	printf("wcHashMapInsert%ld---%f\n",df,(double)df*1E-7);
 	pre = clock();
 	for( i=0;i<10000000;i++){
-		wcHashMapRemove(hm,(void *)i);
+		wcHashMapQuery(hm,(void *)i);
 	}
 	df = clock()-pre;
 	printf("wcHashMapQuery%ld---%f\n",df,(double)df*1E-7);
