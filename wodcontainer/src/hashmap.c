@@ -70,7 +70,7 @@ wcHashMapQuery(struct wcHashMap *hm,const void *key)
 			break;
 		}
 	}
-	if(entry->kv.value){
+	if(entry){
 		return (void *)(hm->ktype.valueClone ? hm->ktype.valueClone(hm->ktenv,entry->kv.value):entry->kv.value);
 	}
 	return NULL;
