@@ -11,6 +11,7 @@
 #include "../include/hashmap.h"
 #include <time.h>
 #include <memory.h>
+ #include <assert.h>
 unsigned 	hashFunc(void *env,const void *key)
 {
 	return (unsigned)key;
@@ -30,7 +31,7 @@ int main(int argc, char const *argv[])
 	printf("wcHashMapInsert%ld---%f\n",df,(double)df*1E-7);
 	pre = clock();
 	for( i=0;i<10000000;i++){
-		wcHashMapQuery(hm,(void *)i);
+		void * ret = wcHashMapQuery(hm,(void *)i);
 	}
 	df = clock()-pre;
 	printf("wcHashMapQuery%ld---%f\n",df,(double)df*1E-7);
