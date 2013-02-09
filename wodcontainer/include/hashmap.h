@@ -38,4 +38,5 @@ void 	wcHashMapDelete(struct wcHashMap * hm);
 int 	wcHashMapInsert(struct wcHashMap * hm,const void *key,const void *value);
 void * 	wcHashMapQuery(struct wcHashMap *hm,const void *key);
 void * 	wcHashMapRemove(struct wcHashMap *hm,const void *key);
+unsigned wcHashMapSize(struct wcHashMap *hm);
 #endif

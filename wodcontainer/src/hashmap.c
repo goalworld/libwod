@@ -36,6 +36,7 @@ wcHashMapNew(struct wcHashMapType hmt,void *hmtenv)
 static inline unsigned
  first_hash_func(struct wcHashMap * hm,const void *inkey){
  	unsigned key = hm->ktype.hashFunc(hm->ktenv,inkey);
+ 	//Tomas Wang
 	key += ~(key << 15);
     key ^=  (key >> 10);
     key +=  (key << 3);
@@ -54,6 +55,16 @@ wcHashMapDelete(struct wcHashMap * hm)
 	}
 	free(hm->tbs);
 	free(hm);
+}
+unsigned 
+wcHashMapSize(struct wcHashMap *hm)
+{
+	unsigned sz = 0;
+	int i=0;
+	for(;i<hm->tblen;i++){
+		sz+=hm->tbs[i]->used;
+	}
+	return sz;
 }
 int 	
 wcHashMapInsert(struct wcHashMap * hm,const void *key,const void *value)
@@ -111,7 +122,7 @@ wcHashMapRemove(struct wcHashMap *hm,const void *key)
 unsigned
 hmtHashFunc(struct wcHashMapTable *hmt,unsigned key)
 {
-	return (key * 7)%hmt->cap;
+	return (key * 7)&(hmt->cap-1);
 }
 
 static struct wcHashMapTable *
