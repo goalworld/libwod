@@ -12,9 +12,17 @@
 #include <time.h>
 #include <memory.h>
  #include <assert.h>
+ #include <sys/time.h>
 unsigned 	hashFunc(void *env,const void *key)
 {
 	return (unsigned)key;
+}
+double
+rainGetTime()
+{
+	struct timeval time;
+	gettimeofday(&time,(void *)0);
+	return time.tv_sec *1E6 + time.tv_usec ;
 }
 int main(int argc, char const *argv[])
 {
@@ -23,18 +31,18 @@ int main(int argc, char const *argv[])
 	whmt.hashFunc = hashFunc;
 	struct wcHashMap *hm = wcHashMapNew(whmt,NULL);
 	int i=0;
-	clock_t pre = clock(),df;
+	double pre = rainGetTime(),df;
 	for(;i<10000000;i++){
 		wcHashMapInsert(hm,(void *)i,(void *)i);
 	}
-	df = clock()-pre;
-	printf("wcHashMapInsert%ld---%f\n",df,(double)df*1E-7);
-	pre = clock();
+	df = rainGetTime()-pre;
+	printf("wcHashMapInsert >>> all:%f---one:%f\n",df,df*1E-7);
+	pre = rainGetTime();
 	for( i=0;i<10000000;i++){
-		void * ret = wcHashMapQuery(hm,(void *)i);
+		wcHashMapQuery(hm,(void *)i);
 	}
-	df = clock()-pre;
-	printf("wcHashMapQuery%ld---%f\n",df,(double)df*1E-7);
+	df = rainGetTime()-pre;
+	printf("wcHashMapQuery >>> all:%f---one:%f\n",df,df*1E-7);
 	wcHashMapDelete(hm);
 	return 0;
 }
