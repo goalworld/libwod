@@ -75,10 +75,10 @@ static void _processIO(struct wvLoop *loop,double runSec){
 		for(;ret>0;ret--){
 			fev = &loop->files[loop->pendFds[ret-1]];
 			if(fev->event & fev->revent & WV_IO_READ){
-				fev->readProc(fev->readArg,WV_IO_READ);
+				fev->readProc(loop,fev->readArg,WV_IO_READ);
 			}
 			if(fev->event & fev->revent & WV_IO_WRITE){
-				fev->writeProc(fev->writeArg,WV_IO_WRITE);
+				fev->writeProc(loop,fev->writeArg,WV_IO_WRITE);
 			}
 		}
 	}else{
@@ -91,7 +91,7 @@ static void _processIdle(struct wvLoop *loop){
 	while(tmp){
 		next = tmp->next;
 		if(!tmp->dispose){
-			tmp->idluceProc(tmp->userdefArg);
+			tmp->idluceProc(loop,tmp->userdefArg);
 		}else{
 			if(pre){
 				pre->next = next;
@@ -118,7 +118,7 @@ static void _processTime(struct wvLoop *loop){
 				double tmpSec;
 				if(tmp->passSec >= tmp->sec){
 					tmp->passSec = 0.0;
-					tmp->dispose = tmp->timeProc(tmp->timeArg);
+					tmp->dispose = tmp->timeProc(loop,tmp->timeArg);
 					tmpSec = tmp->sec;
 				}else{
 					tmpSec = (tmp->sec - tmp->passSec);

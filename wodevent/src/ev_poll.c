@@ -15,38 +15,42 @@
 struct pollData
 {
 	wcArray arr;
-	int * fdmap;
 };
-
-int 
+static int 
+_getIndex(struct pollData * pdata,int fd)
+{
+	int sz = wcArraySize(&pdata->arr),i=0;
+	struct pollfd cut;
+	for(; i<sz; i++){
+		wcArrayAt( &pdata->arr,i,&cut);
+		if(cut.fd == fd){
+			return i;
+		}
+	}
+	return -1;
+}
+static int 
 pollNew(struct wvLoop * loop,int falg)
 {
 	struct pollData * p = malloc(sizeof(struct pollData));
 	assert(p);
-	p->fdmap = (int*)malloc(sizeof(int)*(loop->set_size));
-	assert(p->fdmap);
-	int i = 0;
-	for(;i<loop->set_size;i++){
-		p->fdmap[i] = -1;
-	}
-	//memset(&p.fdmap,-1,sizeof(int)*loop->set_size)
 	wcArrayInit(&p->arr,sizeof(struct pollfd));
 	loop->pollorData = p;
 	return WV_ROK;
 }
-void 
+static void 
 pollDel(struct wvLoop *loop)
 {
 	free(loop->pollorData);
 }
-int 
+static int 
 pollAdd(struct wvLoop *loop,int fd,int mask)
 {
 	
 	struct pollData * p = ( struct pollData *)loop->pollorData;
 	mask |=loop->files[fd].event;
 	struct pollfd cut;
-	int ids = p->fdmap[fd];
+	int ids = _getIndex(p,fd);
 	if( ids >=0 ){
 		wcArrayAt( &p->arr,ids,&cut);
 		if( mask & WV_IO_READ )cut.events  |= POLLIN;
@@ -58,22 +62,20 @@ pollAdd(struct wvLoop *loop,int fd,int mask)
 		if( mask & WV_IO_READ )cut.events |= POLLIN;
 		if( mask & WV_IO_WRITE )cut.events |= POLLOUT;
 		wcArrayPush(&p->arr,&cut);
-		p->fdmap[fd] = wcArraySize(&p->arr) - 1;
 	}
 
 	return WV_ROK;
 }
-int 
+static int 
 pollRemove(struct wvLoop *loop , int fd,int mask)
 {
 	struct pollData * p = (struct pollData *)loop->pollorData;
 	mask =(loop->files[fd].event & (~mask));
 	struct pollfd cut;
-	int ids = p->fdmap[fd];
+	int ids = _getIndex(p,fd);
 	if(ids >=0 ){
 		if(mask == WV_NONE){
 			wcArrayErase(&p->arr,ids,1,NULL);
-			p->fdmap[fd] = -1;
 		}else{
 			wcArrayAt( &p->arr,ids,&cut);
 			if( mask & WV_IO_READ )cut.events |= POLLIN;
@@ -84,7 +86,7 @@ pollRemove(struct wvLoop *loop , int fd,int mask)
 	}
 	return -EINVAL;
 }
-int 
+static  int 
 pollPoll(struct wvLoop *loop,double timeOut)
 {
 	struct pollData * p = (struct pollData *)loop->pollorData;

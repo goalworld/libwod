@@ -23,11 +23,12 @@ enum{
 	WV_POLL_POLL,
 	WV_POLL_KQUEUE
 };
-typedef void (*wvIOFn)(void * nv,int mask);
-typedef int (*wvTimeFn)(void * nv);
-typedef int (*wvUserDefFn)(void * nv);
-
 struct wvLoop;
+
+typedef void (*wvIOFn)(struct wvLoop *loop,void * nv,int mask);
+typedef int (*wvTimeFn)(struct wvLoop *loop,void * nv);
+typedef int (*wvUserDefFn)(struct wvLoop *loop,void * nv);
+
 struct wvLoop * wvLoopNew(int set_size,int type);
 void wvLoopDel(struct wvLoop *);
 void wvRun(struct wvLoop *);

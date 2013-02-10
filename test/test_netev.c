@@ -4,12 +4,13 @@
 #include <stdio.h>
 #include <errno.h>
 #define BUF_SZ 1024
-static void _doAccept(void * nv,int mask);
-static void _doRead(void * nv,int mask);
-struct wvLoop *loop;
+static void _doAccept(struct wvLoop *loop,void * nv,int mask);
+static void _doRead(struct wvLoop *loop,void * nv,int mask);
+
 int 
 main(int argc, char const *argv[])
 {
+	struct wvLoop *loop;
 	loop = wvLoopNew(10240,WV_POLL_POLL);
 	if( !loop ){
 		printf("%s\n", "loop create error" );
@@ -27,7 +28,7 @@ main(int argc, char const *argv[])
 	return 0;
 }
 static void 
-_doAccept(void * nv,int mask)
+_doAccept(struct wvLoop *loop,void * nv,int mask)
 {
 	wnFd fd = (wnFd)(long)(nv);
 	wnFd cfd = wnAccept(fd);
@@ -44,7 +45,7 @@ _doAccept(void * nv,int mask)
 	}
 }
 static void 
-_doRead(void * nv,int mask)
+_doRead(struct wvLoop *loop,void * nv,int mask)
 {
 	wnFd fd = (wnFd)(long)(nv);
 	unsigned char buf[BUF_SZ+1];
@@ -55,5 +56,5 @@ _doRead(void * nv,int mask)
 		return;
 	}
 	buf[nr] = 0;
-	//printf("%s\n", buf+4);
+	printf("%s\n", buf+4);
 }
