@@ -37,10 +37,10 @@ int  wnRead(wnFd fd,void *buf,size_t sz);
 int  wnReadFull(wnFd fd,void *buf,size_t sz);
 
 int  wnClose(wnFd fd);
-int  wnSetKeepAlive(wnFd fd,int flag);
-int  wnSetNoDelay(wnFd fd,int flag);
-int  wnSetNonBlock(wnFd fd,int flag);
-int  wnSetRcvBuf(wnFd fd,int flag);
-int  wnSetSndBuf(wnFd fd,int flag);
+int  wnSetKeepAlive(wnFd fd,int flag);//0,1
+int  wnSetNoDelay(wnFd fd,int flag);//0,1
+int  wnSetNonBlock(wnFd fd,int flag);//0,1
+int  wnSetRcvBuf(wnFd fd,int flag);//SIZE
+int  wnSetSndBuf(wnFd fd,int flag);//SIZE
 
 #endif

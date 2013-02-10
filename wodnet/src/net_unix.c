@@ -113,12 +113,10 @@ wnAccept( wnFd sfd)
 	int ret;
 	for(;;){
 		if( (ret = accept(sfd,NULL,NULL)) < 0){
-			if(ret < 0){
-				if(errno == EINTR){
-					continue;
-				}
-				ret = -errno;
+			if(errno == EINTR){
+				continue;
 			}
+			ret = -errno;
 		}
 		break;
 	}
@@ -141,9 +139,7 @@ wnWritev(wnFd fd,struct wnBuf *bufs,size_t bufslen)
 	int nw;
 	for(;;){
 		if((nw = writev(fd,(struct iovec*)bufs,bufslen)) < 0){
-			if(errno == EINTR){
-				continue;
-			}
+			if(errno == EINTR) continue;
 			nw = -errno;
 		}
 		break;
@@ -156,9 +152,7 @@ wnWrite(wnFd fd,void *buf,size_t sz)
 	int nw;
 	for(;;){
 		if((nw = write(fd,buf,sz)) < 0){
-			if(errno == EINTR){
-				continue;
-			}
+			if(errno == EINTR) continue;
 			nw = -errno;
 		}
 		break;
@@ -171,9 +165,7 @@ wnReadv(wnFd fd,struct wnBuf *bufs,size_t bufslen)
 	int nr;
 	for(;;){
 		if((nr = readv(fd,(struct iovec*)bufs,bufslen)) < 0){
-			if(errno == EINTR){
-				continue;
-			}
+			if(errno == EINTR) continue;
 			nr = -errno;
 		}
 		break;
@@ -191,9 +183,7 @@ wnRead(wnFd fd,void *buf,size_t sz)
 	int nr;
 	for(;;){
 		if((nr = read(fd,buf,sz)) < 0){
-			if(errno == EINTR){
-				continue;
-			}
+			if(errno == EINTR)continue;
 			nr = -errno;
 		}
 		break;
@@ -204,7 +194,11 @@ wnRead(wnFd fd,void *buf,size_t sz)
 int  
 wnClose(wnFd fd)
 {
-	return close(fd);
+	int ret = close(fd);
+	if(ret < 0){
+		return -errno;
+	}
+	return ret;
 }
 int  
 wnSetNonBlock(wnFd fd,int flag)
