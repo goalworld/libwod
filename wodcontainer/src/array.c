@@ -89,9 +89,11 @@ wcArrayErase(wcArray *arr,int index,int numelem,void *elem)
 				(char*)(arr->arr_data) + (index)*arr->elem_sz,
 				numelem*arr->elem_sz);
 	}
-	memmove((char*)(arr->arr_data) + index*arr->elem_sz,
+	if((arr->cut_sz-index-numelem)*arr->elem_sz){
+		memmove((char*)(arr->arr_data) + index*arr->elem_sz,
 			(char*)(arr->arr_data) + (index+numelem)*arr->elem_sz,
 			(arr->cut_sz-index-numelem)*arr->elem_sz);
+	}
 	arr->cut_sz-=numelem;
 }
 void

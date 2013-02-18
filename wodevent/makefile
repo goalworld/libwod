@@ -7,6 +7,6 @@ WDNET_SRCS= ./src/ev.c
 
 all:$(BUILD)libwev.so 
 $(BUILD)libwev.so: $(WDNET_SRCS)
-	$(CC) $(CCFLAGS) $(INCLUDE_DIR) $(SHARED) -o $@ $^ $(BUILD)libwct.so
+	$(CC) $(CCFLAGS) $(INCLUDE_DIR) $(SHARED) -o $@ $^ 
 clean:
 	rm $(BUILD)*

@@ -35,7 +35,9 @@ _doAccept(struct wvLoop *loop,void * nv,int mask)
 	
 	if(cfd > 0){
 		printf("Connected : fd%d\n",cfd );
+		wnSetNonBlock(cfd,1);
 		wvIOAdd(loop,cfd,WV_IO_READ,_doRead,(void *)(cfd));
+		
 	}else if(cfd < 0 && -cfd == EAGAIN){
 		if(-cfd == EAGAIN){
 			perror("wnAccept00000000000");
