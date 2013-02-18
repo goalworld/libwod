@@ -89,7 +89,7 @@ pollRemove(struct wvLoop *loop , int fd,int mask)
 		if(mask == WV_NONE){
 			int sz = sizeof(struct pollfd)*(p->len-ids-1);
 			if(sz){
-				memmove(p->pfdArr+ids,p->pfdArr+ids+1,);
+				memmove(p->pfdArr+ids,p->pfdArr+ids+1,sz);
 			}
 			p->len --;
 		}else{
@@ -105,11 +105,12 @@ static  int
 pollPoll(struct wvLoop *loop,double timeOut)
 {
 	struct pollData * p = (struct pollData *)loop->pollorData;
-	int ret = poll(p->pfdArr,p->len, timeOut*1E3);
+	
 	int numelm = 0;
 	struct wvIO * pio;
 	struct pollfd * cut;
 	int i = 0;
+	int ret = poll(p->pfdArr,p->len, timeOut*1E3);
 	if(ret > 0){
 		for(;i<p->len;i++){
 			cut = p->pfdArr+i;
