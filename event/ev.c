@@ -12,9 +12,9 @@
 #include <unistd.h>
 #include <errno.h>
 
-static int _initPollor(struct wodEvPoller* pllor,int type);
+static int _init_pollor(struct wod_event_pollor* pllor,int type);
 void
-wodEvSleep(long long usec)
+wod_event_sleep(long long usec)
 {
 	if( usec <= 0 ){
 		return ;
@@ -25,7 +25,7 @@ wodEvSleep(long long usec)
 	select(0,NULL,NULL,NULL,&tv);
 }
 long long
-wodEvGetTime()
+wod_event_time()
 {
 	struct timeval time;
 	gettimeofday(&time,NULL);
@@ -36,11 +36,11 @@ _hashFunction(int id)
 {
 	return id%HASH_SIZE;
 }
-struct wodEvLoop *
-wodEvLoopNew(int set_size,int type)
+struct wod_event_loop *
+wod_event_loop_new(int set_size,int type)
 {
-	struct wodEvLoop * loop = malloc(sizeof(struct wodEvLoop));
-	int ret = _initPollor(&loop->pollor,type);
+	struct wod_event_loop * loop = malloc(sizeof(struct wod_event_loop));
+	int ret = _init_pollor(&loop->pollor,type);
 	if(ret != WV_ROK){
 		free(loop);
 		return NULL;
@@ -48,14 +48,14 @@ wodEvLoopNew(int set_size,int type)
 	loop->set_size = set_size;
 	loop->idIndex = loop->set_size;
 	loop->userdefHead = NULL;
-	ret = loop->pollor.New(loop,0);
+	ret = loop->pollor.new(loop,0);
 	if(ret != WV_ROK){
 		free(loop);
 		return NULL;
 	}
 
 
-	loop->files = malloc(sizeof(struct wodEvIO) *set_size);
+	loop->files = malloc(sizeof(struct wod_event_io) *set_size);
 	loop->pendFds = malloc(sizeof(int) *set_size);
 	int i=0;
 	for(i=0; i< loop->set_size; i++){
@@ -68,21 +68,21 @@ wodEvLoopNew(int set_size,int type)
 	return loop;
 }
 void
-wodEvLoopDelete(struct wodEvLoop *loop)
+wodEvLoopDelete(struct wod_event_loop *loop)
 {
-	loop->pollor.Del(loop);
+	loop->pollor.delete(loop);
 	free(loop);
 }
 static void
-_processIO(struct wodEvLoop *loop,long long runSec)
+_processIO(struct wod_event_loop *loop,long long runSec)
 {
 	long long tmpSec = loop->minSec - runSec;
 	if(tmpSec < 0 ){
 		tmpSec = 0;
 	}
 	if(loop->used){
-		int ret = loop->pollor.Poll(loop,tmpSec);
-		struct wodEvIO * fev;
+		int ret = loop->pollor.poll(loop,tmpSec);
+		struct wod_event_io * fev;
 		for(;ret>0;ret--){
 			fev = &loop->files[loop->pendFds[ret-1]];
 			if(fev->event & fev->revent & WV_IO_READ){
@@ -94,11 +94,11 @@ _processIO(struct wodEvLoop *loop,long long runSec)
 		}
 	}else{
 		int usec = tmpSec*1E6 - 100;
-		wodEvSleep(usec);
+		wod_event_sleep(usec);
 	}
 }
-static void _processIdle(struct wodEvLoop *loop){
-	struct wodEvUserDef*tmp=loop->userdefHead,*pre = NULL,*next;
+static void _processIdle(struct wod_event_loop *loop){
+	struct wod_event_userdef*tmp=loop->userdefHead,*pre = NULL,*next;
 	while(tmp){
 		next = tmp->next;
 		if(!tmp->dispose){
@@ -115,15 +115,15 @@ static void _processIdle(struct wodEvLoop *loop){
 		tmp = next;
 	}
 }
-static void _processTime(struct wodEvLoop *loop){
+static void _processTime(struct wod_event_loop *loop){
 	int i =0;
 	loop->minSec = SLEEP;
 	for(i=0;i<HASH_SIZE;i++){
-		struct wodEvTime*tmp=loop->hashMap[i],*pre = NULL,*next;
+		struct wod_event_time*tmp=loop->hashMap[i],*pre = NULL,*next;
 		while(tmp){
 			next = tmp->next;
 			if(!tmp->dispose){
-				long long  cutClock = wodEvGetTime();
+				long long  cutClock = wod_event_time();
 				tmp->passSec += cutClock-tmp->cutClock;
 				tmp->cutClock = cutClock;
 				long long  tmpSec;
@@ -151,37 +151,37 @@ static void _processTime(struct wodEvLoop *loop){
 		}
 	}
 }
-void wodEvOnce(struct wodEvLoop *loop){
+void wod_event_loop_once(struct wod_event_loop *loop){
 	_processTime(loop);
 	_processIO(loop,0);
 	_processIdle(loop);
 }
-void wodEvRun(struct wodEvLoop *loop){
+void wod_event_loop_loop(struct wod_event_loop *loop){
 	long long  space = 0.0,cut;
 	while(!loop->isQuit){
-		cut = wodEvGetTime();
+		cut = wod_event_time();
 		if(loop->preSec == 0){
 			space = 0;
 		}else{
 			space = cut-loop->preSec;
 		}
-		loop->preSec = wodEvGetTime();
+		loop->preSec = wod_event_time();
 		_processTime(loop);
 		_processIO(loop,space);
 		_processIdle(loop);
 	}
 }
-void wodEvStop(struct wodEvLoop *loop){
+void wod_event_loop_stop(struct wod_event_loop *loop){
 	loop->isQuit = 1;
 }
 
-int wodEvIOAdd(struct wodEvLoop *loop,int fd,int event,wodEvIOFn cb,void *cbArg){
+int wod_event_io_add(struct wod_event_loop *loop,int fd,int event,wod_event_io_fn cb,void *cbArg){
 	if(fd > loop->set_size || fd <= 0 || !cb){
 		return -EINVAL;
 	}
-	struct wodEvIO *pFile = &loop->files[fd];
+	struct wod_event_io *pFile = &loop->files[fd];
 	pFile->fd = fd;
-	int ret = loop->pollor.Add(loop,fd,event);
+	int ret = loop->pollor.add(loop,fd,event);
 	if(ret != WV_ROK){
 		return ret;
 	}
@@ -200,13 +200,13 @@ int wodEvIOAdd(struct wodEvLoop *loop,int fd,int event,wodEvIOFn cb,void *cbArg)
 
 	return fd;
 }
-void wodEvIORemove(struct wodEvLoop *loop,int id,int event){
+void wod_event_io_remove(struct wod_event_loop *loop,int id,int event){
 	if(id > loop->set_size){
 		return ;
 	}
-	struct wodEvIO *pFile = &loop->files[id];
+	struct wod_event_io *pFile = &loop->files[id];
 	if(pFile->event & event){
-		loop->pollor.Remove(loop,pFile->fd,event);
+		loop->pollor.remove(loop,pFile->fd,event);
 		pFile->event &= (~event);
 		if(pFile->event == WV_NONE){
 			loop->used --;
@@ -214,13 +214,13 @@ void wodEvIORemove(struct wodEvLoop *loop,int id,int event){
 	}
 }
 
-int wodEvTimeAdd(struct wodEvLoop *loop,long long usec,wodEvTimeFn cb,void *cbArg){
+int wod_event_time_add(struct wod_event_loop *loop,long long usec,wod_event_time_fn cb,void *cbArg){
 	if(!cb){
 		return -EINVAL;
 	}
-	struct wodEvTime * pTime = malloc(sizeof(struct wodEvTime));
+	struct wod_event_time * pTime = malloc(sizeof(struct wod_event_time));
 	pTime->id = loop->idIndex++;
-	pTime->cutClock = wodEvGetTime();
+	pTime->cutClock = wod_event_time();
 	pTime->sec = usec;
 	pTime->passSec = 0.0;
 	pTime->timeArg = cbArg;
@@ -231,9 +231,9 @@ int wodEvTimeAdd(struct wodEvLoop *loop,long long usec,wodEvTimeFn cb,void *cbAr
 	loop->hashMap[hash] = pTime;
 	return pTime->id;
 }
-void wodEvTimeRemove(struct wodEvLoop * loop,int id){
+void wod_event_time_remove(struct wod_event_loop * loop,int id){
 	int hash = _hashFunction(id);
-	struct wodEvTime*tmp=loop->hashMap[hash];
+	struct wod_event_time*tmp=loop->hashMap[hash];
 	while(tmp){
 		if(tmp->id == id){
 			tmp->dispose = 1;
@@ -242,11 +242,11 @@ void wodEvTimeRemove(struct wodEvLoop * loop,int id){
 	}
 }
 
-int wodEvUserDefAdd(struct wodEvLoop *loop,wodEvUserDefFn cb,void *cbArg){
+int wod_event_userdef_add(struct wod_event_loop *loop,wod_event_userdef_fn cb,void *cbArg){
 	if(!cb){
 		return -EINVAL;
 	}
-	struct wodEvUserDef * pIdle = malloc(sizeof(struct wodEvUserDef));
+	struct wod_event_userdef * pIdle = malloc(sizeof(struct wod_event_userdef));
 	pIdle->next = loop->userdefHead;
 	loop->userdefHead  = pIdle;
 	pIdle->id = loop->idIndex++;
@@ -255,8 +255,8 @@ int wodEvUserDefAdd(struct wodEvLoop *loop,wodEvUserDefFn cb,void *cbArg){
 	pIdle->dispose = 0;
 	return pIdle->id;
 }
-void wodEvUserDefRemove(struct wodEvLoop *loop,int id){
-	struct wodEvUserDef*tmp=loop->userdefHead;
+void wod_event_userdef_remove(struct wod_event_loop *loop,int id){
+	struct wod_event_userdef*tmp=loop->userdefHead;
 	while(tmp){
 		if(tmp->id == id){
 			tmp->dispose = 1;
@@ -264,7 +264,7 @@ void wodEvUserDefRemove(struct wodEvLoop *loop,int id){
 		tmp = tmp->next;
 	}
 }
-
+#define HAS_EPOLL 1
 #define HAS_SELECT 1
 #define HAS_POLL 1
 #if HAS_EPOLL
@@ -276,7 +276,7 @@ void wodEvUserDefRemove(struct wodEvLoop *loop,int id){
 #if HAS_POLL
 #include "ev_poll.c"
 #endif
-static int _initPollor(struct wodEvPoller* pllor,int type){
+static int _init_pollor(struct wod_event_pollor* pllor,int type){
 	if(type == WV_POLL_EPOLL){
 #if HAS_EPOLL
 		SET_POLLER(poller,epoll);

@@ -9,21 +9,20 @@
 #define _WOD_ARRAY_H_
 
 
-struct wodArray
+struct wod_array
 {
 	void *arr_data;
 	int elem_sz;
 	int arr_sz;
 	int cut_sz;
 };
-#define wodArrayGetBuffer(parr) ((parr)->arr_data)
-void wodArrayInit(struct wodArray *arr,int elemsz);
-void wodArrayDestroy(struct wodArray *arr);
-void wodArrayPush(struct wodArray *arr,void *elem);
-void wodArrayAt(struct wodArray *arr,int index,void *elem);
-void wodArraySet(struct wodArray *arr,int index,void *elem);
-void wodArrayUnShift(struct wodArray *arr,void *elem);
-void wodArrayErase(struct wodArray *arr,int index,int numelem,void *elem);
-void wodArrayInsert(struct wodArray *arr,int index,void *elem,int numelem);
-unsigned wodArraySize(struct wodArray *arr);
+void wod_array_init(struct wod_array *arr,int elemsz);
+void wod_array_destroy(struct wod_array *arr);
+void wod_array_push(struct wod_array *arr,void *elem);
+void wod_array_at(struct wod_array *arr,int index,void *elem);
+void wod_array_set(struct wod_array *arr,int index,void *elem);
+void wod_array_unshift(struct wod_array *arr,void *elem);
+void wod_array_earse(struct wod_array *arr,int index,int numelem,void *elem);
+void wod_array_insert(struct wod_array *arr,int index,void *elem,int numelem);
+unsigned wod_array_size(struct wod_array *arr);
 #endif /* RAIN_ARRAY_H_ */

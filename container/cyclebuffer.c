@@ -4,14 +4,14 @@
  *  Created on: 2012-11-11
  *      Author: goalworld
  */
-#include "wod_cyclebuffer.h"
+#include "../include/wod_cyclebuffer.h"
 #include <stdlib.h>
 #include <memory.h>
 #include <assert.h>
-static int _resize_byuse(struct wodCycleBuf* cycle,int usesz);
-static int 	_get_free_sz(struct wodCycleBuf* cycle);
+static int _resize_byuse(wod_cycle_buffer_t* cycle,int usesz);
+static int 	_get_free_sz(wod_cycle_buffer_t* cycle);
 int
-wodCycleBufInit( struct wodCycleBuf* cycle,int defsize)
+wod_cycle_buffer_init( wod_cycle_buffer_t* cycle,int defsize)
 {
 	if(!cycle || defsize <= 0){
 		return -1;
@@ -23,7 +23,7 @@ wodCycleBufInit( struct wodCycleBuf* cycle,int defsize)
 	return 0;
 }
 int
-wodCycleBufPush(struct wodCycleBuf* cycle,void *buf,int bufsz)
+wod_cycle_buffer_push(wod_cycle_buffer_t* cycle,void *buf,int bufsz)
 {
 	if(!buf || bufsz<=0){
 		return -1;
@@ -49,7 +49,7 @@ wodCycleBufPush(struct wodCycleBuf* cycle,void *buf,int bufsz)
 }
 
 void
-wodCycleBufPop(struct wodCycleBuf* cycle,int sz)
+wod_cycle_buffer_pop(wod_cycle_buffer_t* cycle,int sz)
 {
 	int usedsz = cycle->cap - _get_free_sz(cycle);
 	if(usedsz > sz){
@@ -59,7 +59,7 @@ wodCycleBufPop(struct wodCycleBuf* cycle,int sz)
 	}
 }
 int
-wodCycleBufUsed(struct wodCycleBuf* cycle,struct wodCyclePair * pair)
+wod_cycle_buffer_get_used(wod_cycle_buffer_t* cycle,wod_cycle_pair_t * pair)
 {
 	if(cycle->head == cycle->tail){
 		return -1;
@@ -80,7 +80,7 @@ wodCycleBufUsed(struct wodCycleBuf* cycle,struct wodCyclePair * pair)
 	return 0;
 }
 int
-wodCycleBufGrow(struct wodCycleBuf* cycle,int freesize,struct wodCyclePair *pair)
+wod_cycle_buffer_grow(wod_cycle_buffer_t* cycle,int freesize,wod_cycle_pair_t *pair)
 {
 	if( freesize<0){
 		return -1;
@@ -119,7 +119,7 @@ wodCycleBufGrow(struct wodCycleBuf* cycle,int freesize,struct wodCyclePair *pair
 	return 0;
 }
 void
-wodCycleBufBack(struct wodCycleBuf* cycle,int backsz)
+wod_cycle_buffer_back(wod_cycle_buffer_t* cycle,int backsz)
 {
 	int usedsz = cycle->cap - _get_free_sz(cycle);
 	if(usedsz > backsz){
@@ -129,12 +129,12 @@ wodCycleBufBack(struct wodCycleBuf* cycle,int backsz)
 	}
 }
 void
-wodCycleBufDestroy( struct wodCycleBuf* cycle )
+wod_cycle_buffer_destroy( wod_cycle_buffer_t* cycle )
 {
 	free(cycle->buf);
 }
 static int
-_get_free_sz(struct wodCycleBuf* cycle)
+_get_free_sz(wod_cycle_buffer_t* cycle)
 {//可用的SIZE
 	int freesize = 0;
 	if(cycle->head > cycle->tail){
@@ -147,12 +147,12 @@ _get_free_sz(struct wodCycleBuf* cycle)
 	return freesize;
 }
 bool
-wodCycleBufEmpty( struct wodCycleBuf* cycle )
+wod_cycle_buffer_empty( wod_cycle_buffer_t* cycle )
 {
 	return (cycle->head == cycle->tail);
 }
 static int
-_resize_byuse(struct wodCycleBuf* cycle,int usesz)
+_resize_byuse(wod_cycle_buffer_t* cycle,int usesz)
 {
 	int freesize = _get_free_sz(cycle);
 	int newodaps = cycle->cap;

@@ -18,7 +18,7 @@ struct pollData
 	int len;
 };
 static int 
-_getIndex(struct pollData * pdata,int fd)
+_get_index(struct pollData * pdata,int fd)
 {
 	int i=0;
 	struct pollfd *cut;
@@ -30,7 +30,8 @@ _getIndex(struct pollData * pdata,int fd)
 	}
 	return -1;
 }
-void _arrPush(struct pollData *pdata,int fd,int events)
+static void
+_arr_push(struct pollData *pdata,int fd,int events)
 {
 	if(pdata->len == pdata->cap){
 		pdata->cap *=2;
@@ -41,7 +42,7 @@ void _arrPush(struct pollData *pdata,int fd,int events)
 	pdata->len++;
 }
 static int 
-pollNew(struct wodEvLoop * loop,int falg)
+poll_new(struct wod_event_loop * loop,int falg)
 {
 	struct pollData * p = malloc(sizeof(struct pollData));
 	assert(p);
@@ -52,20 +53,20 @@ pollNew(struct wodEvLoop * loop,int falg)
 	return WV_ROK;
 }
 static void 
-pollDel(struct wodEvLoop *loop)
+poll_delete(struct wod_event_loop *loop)
 {
 	struct pollData * p = ( struct pollData *)loop->pollorData;
 	free(p->pfdArr);
 	free(p);
 }
 static int 
-pollAdd(struct wodEvLoop *loop,int fd,int mask)
+poll_add(struct wod_event_loop *loop,int fd,int mask)
 {
 	
 	struct pollData * p = ( struct pollData *)loop->pollorData;
 	mask |=loop->files[fd].event;
 	struct pollfd *cut;
-	int ids = _getIndex(p,fd);
+	int ids = _get_index(p,fd);
 	if( ids >=0 ){
 		cut = p->pfdArr+ids;
 		if( mask & WV_IO_READ )cut->events  |= POLLIN;
@@ -74,17 +75,17 @@ pollAdd(struct wodEvLoop *loop,int fd,int mask)
 		int events = 0;
 		if( mask & WV_IO_READ )events |= POLLIN;
 		if( mask & WV_IO_WRITE )events |= POLLOUT;
-		_arrPush(p,fd,events);
+		_arr_push(p,fd,events);
 	}
 	return WV_ROK;
 }
 static int 
-pollRemove(struct wodEvLoop *loop , int fd,int mask)
+poll_remove(struct wod_event_loop *loop , int fd,int mask)
 {
 	struct pollData * p = (struct pollData *)loop->pollorData;
 	mask =(loop->files[fd].event & (~mask));
 	struct pollfd *cut;
-	int ids = _getIndex(p,fd);
+	int ids = _get_index(p,fd);
 	if(ids >=0 ){
 		if(mask == WV_NONE){
 			int sz = sizeof(struct pollfd)*(p->len-ids-1);
@@ -102,12 +103,12 @@ pollRemove(struct wodEvLoop *loop , int fd,int mask)
 	return -EINVAL;
 }
 static  int 
-pollPoll(struct wodEvLoop *loop,long long timeOut)
+poll_poll(struct wod_event_loop *loop,long long timeOut)
 {
 	struct pollData * p = (struct pollData *)loop->pollorData;
 	
 	int numelm = 0;
-	struct wodEvIO * pio;
+	struct wod_event_io * pio;
 	struct pollfd * cut;
 	int i = 0;
 	int ret = poll(p->pfdArr,p->len, timeOut/1000);

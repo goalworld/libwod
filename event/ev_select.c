@@ -15,7 +15,7 @@ typedef struct selectData{
 	fd_set wset;
 }selectData;
 static int
-selectNew(struct wodEvLoop * loop,int flag)
+select_new(struct wod_event_loop * loop,int flag)
 {
 	selectData * p = malloc(sizeof(selectData));
 	assert(p);
@@ -26,13 +26,13 @@ selectNew(struct wodEvLoop * loop,int flag)
 	return WV_ROK;
 }
 static void
-selectDel(struct wodEvLoop *loop)
+select_delete(struct wod_event_loop *loop)
 {
 	free(loop->pollorData);
 	return ;
 }
 static int
-selectAdd(struct wodEvLoop *loop,int fd,int mask)
+select_add(struct wod_event_loop *loop,int fd,int mask)
 {
 	selectData * p = (selectData *)loop->pollorData;
 	if(fd > p->maxfd){
@@ -46,7 +46,7 @@ selectAdd(struct wodEvLoop *loop,int fd,int mask)
 	return WV_ROK;
 }
 static int
-selectRemove(struct wodEvLoop *loop , int fd,int mask)
+select_remove(struct wod_event_loop *loop , int fd,int mask)
 {
 	selectData * p = (selectData *)loop->pollorData;
 	mask =(loop->files[fd].event & (~mask));
@@ -57,14 +57,14 @@ selectRemove(struct wodEvLoop *loop , int fd,int mask)
 	if( mask == WV_NONE && fd == p->maxfd){
 		int i = p->maxfd;
 		for(;i >=0 ;i--){
-			struct wodEvIO * pio = &loop->files[i];
+			struct wod_event_io * pio = &loop->files[i];
 			if(pio->event != WV_NONE) p->maxfd = pio->fd;
 		}
 	}
 	return WV_ROK;
 }
 static int
-selectPoll(struct wodEvLoop *loop,long long timeOut)
+select_poll(struct wod_event_loop *loop,long long timeOut)
 {
 	selectData * p = (selectData *)loop->pollorData;
 	fd_set rset,wset;
@@ -80,7 +80,7 @@ selectPoll(struct wodEvLoop *loop,long long timeOut)
 	case -1:return -errno;
 	}
 	for(;i < max;i++){
-		struct wodEvIO * pio = &loop->files[i];
+		struct wod_event_io * pio = &loop->files[i];
 		if(pio->event == WV_NONE) continue;
 		pio->revent = WV_NONE;
 		if(pio->event& WV_IO_READ && FD_ISSET(pio->fd,&rset))	pio->revent |= WV_IO_READ;

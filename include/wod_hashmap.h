@@ -5,43 +5,43 @@ Auther:goalworld
 */
 #ifndef _WOD__HASH_MAP_
 #define _WOD__HASH_MAP_
-struct wodHashMapEntry
+struct wod_hashmap_entry
 {
 	struct{
 		const void *key;
 		const void *value;
 	}kv;
 	unsigned tkey;
-	struct wodHashMapEntry *next;
+	struct wod_hashmap_entry *next;
 };
-struct wodHashMapTable
+struct wod_hashmap_table
 {
-	struct wodHashMapEntry** etys;
+	struct wod_hashmap_entry** etys;
 	unsigned used;
 	unsigned cap;
 	unsigned hashkey;
 };
-struct wodHashMapType
+struct wod_hash_map_type
 {
-	unsigned 	(*hashFunc)(void *env,const void *key);
-	int 		(*keyCampre)(void *env,const void *key1,const void *key2);
-	void *		(*keyClone)(void *env,const void *key);
-	void *		(*valueClone)(void *env,const void *value);
-	void 		(*keyDestroy)(void *env,const void *key);
-	void 		(*valueDestroy)(void *env,const void *value);
+	unsigned 	(*hash_func)(void *env,const void *key);
+	int 		(*key_compare)(void *env,const void *key1,const void *key2);
+	void *		(*key_clone)(void *env,const void *key);
+	void *		(*value_clone)(void *env,const void *value);
+	void 		(*key_destroy)(void *env,const void *key);
+	void 		(*value_destroy)(void *env,const void *value);
 };
-struct wodHashMap
+ struct wod_hash_map
 {
-	struct wodHashMapType ktype;
+	struct  wod_hash_map_type ktype;
 	void * ktenv;
-	struct wodHashMapTable** tbs;
+	struct wod_hashmap_table** tbs;
 	unsigned tblen;
 	unsigned tbcap;
-};
-struct wodHashMap * wodHashMapNew(struct wodHashMapType hmt,void *hmtenv);
-void 	wodHashMapDelete(struct wodHashMap * hm);
-int 	wodHashMapInsert(struct wodHashMap * hm,const void *key,const void *value);
-void * 	wodHashMapQuery(struct wodHashMap *hm,const void *key);
-void * 	wodHashMapRemove(struct wodHashMap *hm,const void *key);
-unsigned wodHashMapSize(struct wodHashMap *hm);
+} ;
+struct wod_hash_map* wod_hashmap_new( struct wod_hash_map_type hmt,void *hmtenv);
+void 	wod_hashmap_delete(struct wod_hash_map* hm);
+int 	wod_hashmap_insert(struct wod_hash_map* hm,const void *key,const void *value);
+void * 	wod_hashmap_query(struct wod_hash_map*hm,const void *key);
+void * 	wod_hashmap_remove(struct wod_hash_map*hm,const void *key);
+unsigned wod_hashmap_size(struct wod_hash_map*hm);
 #endif

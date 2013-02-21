@@ -10,59 +10,60 @@
 #include "../include/wod_ev.h"
 #define HASH_SIZE 32
 #define SLEEP 1E1//1ms
-struct wodEvLoop;
-struct wodEvPoller{
-	int (*New)(struct wodEvLoop * loop,int flag);
-	void (*Del)(struct wodEvLoop *loop);
-	int (*Add)(struct wodEvLoop *loop,int fd,int mask);
-	int	(*Remove)(struct wodEvLoop *loop , int fd,int mask);
-	int (*Poll)(struct wodEvLoop *loop,long long timeOut);
+struct wod_event_loop;
+struct wod_event_pollor{
+	int (*new)(struct wod_event_loop * loop,int flag);
+	void (*delete)(struct wod_event_loop *loop);
+	int (*add)(struct wod_event_loop *loop,int fd,int mask);
+	int	(*remove)(struct wod_event_loop *loop , int fd,int mask);
+	int (*poll)(struct wod_event_loop *loop,long long timeOut);
 };
-struct wodEvTime{
+struct wod_event_time{
 	int id;
-	wodEvTimeFn timeProc;
+	wod_event_time_fn timeProc;
 	void * timeArg;
 	long long sec;
 	long long passSec;
 	long long cutClock;
 	int dispose;
 	int repetTims;
-	struct wodEvTime *next;
+	struct wod_event_time *next;
 };
-struct wodEvIO{
+struct wod_event_io{
 	int fd;
-	wodEvIOFn readProc;
+	wod_event_io_fn readProc;
 	void * readArg;
-	wodEvIOFn writeProc;
+	wod_event_io_fn writeProc;
 	void * writeArg;
 	int event;//WV_NONE
 	int revent;//WV_NONE
 };
-struct wodEvUserDef{
+struct wod_event_userdef{
 	int id;
-	wodEvUserDefFn idluceProc;
+	wod_event_userdef_fn idluceProc;
 	int dispose;
 	void * userdefArg;
-	struct wodEvUserDef * next;
+	struct wod_event_userdef * next;
 };
-struct wodEvLoop{
-	struct wodEvPoller pollor;
+struct wod_event_loop{
+	struct wod_event_pollor pollor;
 	void * pollorData;
 	int isQuit;
 	int set_size;
-	struct wodEvIO * files;
+	struct wod_event_io * files;
 	int *pendFds;
 	int idIndex;
-	struct wodEvUserDef * userdefHead;
-	struct wodEvTime* hashMap[HASH_SIZE];
+	struct wod_event_userdef * userdefHead;
+	struct wod_event_time* hashMap[HASH_SIZE];
 	int used;
 	long long minSec;
 	long long preSec;
 };
 #define SET_POLLER(poller,type) \
-				pllor->Add = type##Add;\
-				pllor->Del = type##Del;\
-				pllor->New = type##New;\
-				pllor->Poll = type##Poll;\
-				pllor->Remove = type##Remove;
+				pllor->new = type##_new;\
+				pllor->delete = type##_delete;\
+				pllor->add = type##_add;\
+				pllor->remove = type##_remove;\
+				pllor->poll = type##_poll;
+
 #endif /* GODEV_INNER_H_ */

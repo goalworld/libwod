@@ -10,38 +10,38 @@ Auther:goalworld
 
 #if HAS_OS_WINDOWS
 #define <windows.h>
-typedef SOCKET wodNetFd;
+typedef SOCKET wod_socket_t;
 #else
-typedef int wodNetFd;
+typedef int wod_socket_t;
 #endif
 
 enum wodNetTCP{
 	TCP4,
 	TCP6
 };
-struct wodNetBuf{
+struct wod_socket_buf{
 	void * b_body;
 	size_t b_sz;
 };
-wodNetFd wodNetTcpListen(enum wodNetTCP,const char * addr,int port);
-wodNetFd wodNetTcpConnect(enum wodNetTCP,const char * addr,int port);
-wodNetFd wodNetAccept( wodNetFd fd);
-int  wodNetClose(wodNetFd fd);
+wod_socket_t wod_tcp_listen(enum wodNetTCP,const char * addr,int port);
+wod_socket_t wod_tcp_connect(enum wodNetTCP,const char * addr,int port);
+wod_socket_t wod_accept( wod_socket_t fd);
+int  wod_close(wod_socket_t fd);
 
-int  wodNetRemoteAddr(wodNetFd fd,char * strptr,size_t len,int *port);
-int  wodNetLocateAddr(wodNetFd fd,char * strptr,size_t len,int *port);
-int  wodNetWritev(wodNetFd fd ,struct wodNetBuf *bufs,size_t bufslen);
-int  wodNetWrite(wodNetFd fd,void *buf,size_t sz);
-int  wodNetReadv(wodNetFd fd,struct wodNetBuf *bufs,size_t bufslen);
-int  wodNetRead(wodNetFd fd,void *buf,size_t sz);
+int  wod_remote_addr(wod_socket_t fd,char * strptr,size_t len,int *port);
+int  wod_locate_addr(wod_socket_t fd,char * strptr,size_t len,int *port);
+int  wod_writev(wod_socket_t fd ,struct wod_socket_buf *bufs,size_t bufslen);
+int  wod_write(wod_socket_t fd,void *buf,size_t sz);
+int  wod_readv(wod_socket_t fd,struct wod_socket_buf *bufs,size_t bufslen);
+int  wod_read(wod_socket_t fd,void *buf,size_t sz);
 
-int  wodNetReadFull(wodNetFd fd,void *buf,size_t sz);
+int  wod_read_full(wod_socket_t fd,void *buf,size_t sz);
 
 
-int  wodNetSetKeepAlive(wodNetFd fd,int flag);//0,1
-int  wodNetSetNoDelay(wodNetFd fd,int flag);//0,1
-int  wodNetSetNonBlock(wodNetFd fd,int flag);//0,1
-int  wodNetSetRcvBuf(wodNetFd fd,int flag);//SIZE
-int  wodNetSetSndBuf(wodNetFd fd,int flag);//SIZE
+int  wod_set_keep_alive(wod_socket_t fd,int flag);//0,1
+int  wod_set_nodelay(wod_socket_t fd,int flag);//0,1
+int  wod_set_noblock(wod_socket_t fd,int flag);//0,1
+int  wod_set_recv_buffer_size(wod_socket_t fd,int flag);//SIZE
+int  wod_set_send_buffer_size(wod_socket_t fd,int flag);//SIZE
 
 #endif

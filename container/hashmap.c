@@ -1,26 +1,26 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <memory.h>
-#include "wod_hashmap.h"
+#include "../include/wod_hashmap.h"
 #include <assert.h>
 #define MAX_LENGTH 1024*1024
 
-static struct wodHashMapTable *  _hmtNew(unsigned key,unsigned sz);
-static void _hmtDelete(struct wodHashMap * hm,struct wodHashMapTable * hmt);
-static void  _hmtReHash(struct wodHashMap * hm,int index);
-static void _hmtDetach(struct wodHashMap *hm,int lindex,int rindex);
-static struct wodHashMapEntry *  _hmtRemove(struct wodHashMap * hm,int lindex,unsigned key);
-static struct wodHashMapEntry *  _hmtQuery(struct wodHashMap * hm,int lindex,unsigned key);
-static int _hmtInsert(struct wodHashMap * hm,int index,unsigned key ,struct wodHashMapEntry * entry);
-static void _hmtNeedDetach(struct wodHashMap  *hm,unsigned index);
+static struct wod_hashmap_table *  _hmt_new(unsigned key,unsigned sz);
+static void _hmt_delete(struct wod_hash_map * hm,struct wod_hashmap_table * hmt);
+static void  _hmt_rehash(struct wod_hash_map * hm,int index);
+static void _hmt_detach(struct wod_hash_map *hm,int lindex,int rindex);
+static struct wod_hashmap_entry *  _hmt_remove(struct wod_hash_map * hm,int lindex,unsigned key);
+static struct wod_hashmap_entry *  _hmt_query(struct wod_hash_map * hm,int lindex,unsigned key);
+static int _hmt_insert(struct wod_hash_map * hm,int index,unsigned key ,struct wod_hashmap_entry * entry);
+static void _hmt_need_detach(struct wod_hash_map  *hm,unsigned index);
 
 
 
 
-struct wodHashMap *
-wodHashMapNew(struct wodHashMapType hmt,void *hmtenv)
+struct wod_hash_map *
+wod_hashmap_new(struct wod_hash_map_type hmt,void *hmtenv)
 {
-	struct wodHashMap * hm = malloc(sizeof(struct wodHashMap));
+	struct wod_hash_map * hm = malloc(sizeof(struct wod_hash_map));
 	hm->ktenv = hmtenv;
 	hm->ktype = hmt;
 	hm->tblen = 4;
@@ -29,13 +29,13 @@ wodHashMapNew(struct wodHashMapType hmt,void *hmtenv)
 	unsigned i = 0;
 	unsigned df = 0xffffffff/hm->tblen;
 	for(;i<hm->tblen;i++){
-		hm->tbs[i] = _hmtNew((i+1)*df,32);
+		hm->tbs[i] = _hmt_new((i+1)*df,32);
 	}
 	return hm;
 }
 static inline unsigned
- first_hash_func(struct wodHashMap * hm,const void *inkey){
- 	unsigned key = hm->ktype.hashFunc(hm->ktenv,inkey);
+ first_hash_func(struct wod_hash_map * hm,const void *inkey){
+ 	unsigned key = hm->ktype.hash_func(hm->ktenv,inkey);
  	//Tomas Wang
 	key += ~(key << 15);
     key ^=  (key >> 10);
@@ -47,17 +47,17 @@ static inline unsigned
  }
 
 void 	
-wodHashMapDelete(struct wodHashMap * hm)
+wod_hashmap_delete(struct wod_hash_map * hm)
 {
 	int i = 0;
 	for(;i<hm->tblen;i++){
-		_hmtDelete(hm,hm->tbs[i]);
+		_hmt_delete(hm,hm->tbs[i]);
 	}
 	free(hm->tbs);
 	free(hm);
 }
 unsigned 
-wodHashMapSize(struct wodHashMap *hm)
+wod_hashmap_size(struct wod_hash_map *hm)
 {
 	unsigned sz = 0;
 	int i=0;
@@ -67,51 +67,51 @@ wodHashMapSize(struct wodHashMap *hm)
 	return sz;
 }
 int 	
-wodHashMapInsert(struct wodHashMap * hm,const void *key,const void *value)
+wod_hashmap_insert(struct wod_hash_map * hm,const void *key,const void *value)
 {
-	struct wodHashMapEntry * entry = malloc(sizeof(struct wodHashMapEntry));
-	entry->kv.key =   hm->ktype.keyClone   ? hm->ktype.keyClone(hm->ktenv,key):key;
-	entry->kv.value = hm->ktype.valueClone ? hm->ktype.valueClone(hm->ktenv,value):value;
+	struct wod_hashmap_entry * entry = malloc(sizeof(struct wod_hashmap_entry));
+	entry->kv.key =   hm->ktype.key_clone   ? hm->ktype.key_clone(hm->ktenv,key):key;
+	entry->kv.value = hm->ktype.value_clone ? hm->ktype.value_clone(hm->ktenv,value):value;
 	entry->tkey = first_hash_func(hm,key);
 	entry->next = NULL;
 	int i=0;
 	for(;i<hm->tblen;i++){
 		if(entry->tkey <= hm->tbs[i]->hashkey){
-			_hmtInsert(hm,i,entry->tkey,entry);
+			_hmt_insert(hm,i,entry->tkey,entry);
 			break;
 		}
 	}
 	return 0;
 }
 void *
-wodHashMapQuery(struct wodHashMap *hm,const void *key)
+wod_hashmap_query(struct wod_hash_map *hm,const void *key)
 {
-	struct wodHashMapEntry * entry;
+	struct wod_hashmap_entry * entry;
 	unsigned tkey =first_hash_func(hm,key);
 	int i=0;
 	for(;i<hm->tblen;i++){
 		if(tkey <= hm->tbs[i]->hashkey){
-			entry = _hmtQuery(hm,i,tkey);
+			entry = _hmt_query(hm,i,tkey);
 			break;
 		}
 	}
 	if(entry){
-		return (void *)(hm->ktype.valueClone ? hm->ktype.valueClone(hm->ktenv,entry->kv.value):entry->kv.value);
+		return (void *)(hm->ktype.value_clone ? hm->ktype.value_clone(hm->ktenv,entry->kv.value):entry->kv.value);
 	}
 	return NULL;
 }
 void *
-wodHashMapRemove(struct wodHashMap *hm,const void *key)
+wod_hashmap_remove(struct wod_hash_map *hm,const void *key)
 {
-	struct wodHashMapEntry * entry;
+	struct wod_hashmap_entry * entry;
 	unsigned tkey = first_hash_func(hm,key);
 	int i=0;
 	void *value = NULL;
 	for(;i<hm->tblen;i++){
 		if(tkey <= hm->tbs[i]->hashkey){
-			entry = _hmtRemove(hm,i,tkey);
+			entry = _hmt_remove(hm,i,tkey);
 			if(entry){
-				value = (void *)(hm->ktype.valueClone ? hm->ktype.valueClone(hm->ktenv,entry->kv.value):entry->kv.value);
+				value = (void *)(hm->ktype.value_clone ? hm->ktype.value_clone(hm->ktenv,entry->kv.value):entry->kv.value);
 				free(entry);
 			}
 			break;
@@ -120,15 +120,15 @@ wodHashMapRemove(struct wodHashMap *hm,const void *key)
 	return value;
 }
 unsigned
-hmtHashFunc(struct wodHashMapTable *hmt,unsigned key)
+hmtHashFunc(struct wod_hashmap_table *hmt,unsigned key)
 {
 	return (key * 7)&(hmt->cap-1);
 }
 
-static struct wodHashMapTable *
-_hmtNew(unsigned key,unsigned sz)
+static struct wod_hashmap_table *
+_hmt_new(unsigned key,unsigned sz)
 {
-	struct wodHashMapTable * hmt = malloc(sizeof(struct wodHashMapTable));
+	struct wod_hashmap_table * hmt = malloc(sizeof(struct wod_hashmap_table));
 	hmt->etys = malloc(sz*sizeof(void *));
 	memset(hmt->etys,0,sz*sizeof(void *));
 	hmt->used = 0;
@@ -137,16 +137,16 @@ _hmtNew(unsigned key,unsigned sz)
 	return hmt;
 }
 static void
-_hmtDelete(struct wodHashMap *hm,struct wodHashMapTable * hmt)
+_hmt_delete(struct wod_hash_map *hm,struct wod_hashmap_table * hmt)
 {
 	int i=0;
-	struct wodHashMapEntry *tmp,*cut;
+	struct wod_hashmap_entry *tmp,*cut;
 	for(;i<hmt->cap;i++){
 		cut = hmt->etys[i];
 		while(cut){
 			tmp = cut->next;
-			if(hm->ktype.keyDestroy)hm->ktype.keyDestroy(hm->ktenv,cut->kv.key);
-			if(hm->ktype.keyDestroy)hm->ktype.valueDestroy(hm->ktenv,cut->kv.value);
+			if(hm->ktype.key_destroy)hm->ktype.key_destroy(hm->ktenv,cut->kv.key);
+			if(hm->ktype.key_destroy)hm->ktype.value_destroy(hm->ktenv,cut->kv.value);
 			free(cut);
 			cut = tmp;
 		}
@@ -155,9 +155,9 @@ _hmtDelete(struct wodHashMap *hm,struct wodHashMapTable * hmt)
 	free(hmt);
 }
 static int
-_hmtInsert(struct wodHashMap * hm,int index,unsigned key ,struct wodHashMapEntry * entry)
+_hmt_insert(struct wod_hash_map * hm,int index,unsigned key ,struct wod_hashmap_entry * entry)
 {
-	struct wodHashMapTable *hmt = hm->tbs[index];
+	struct wod_hashmap_table *hmt = hm->tbs[index];
 	
 	int i = hmtHashFunc(hmt,key);
 	entry->next = hmt->etys[i];
@@ -165,19 +165,19 @@ _hmtInsert(struct wodHashMap * hm,int index,unsigned key ,struct wodHashMapEntry
 	hmt->used++;
 	if(hmt->cap == hmt->used){
 		if( hmt->cap <= MAX_LENGTH/2 ){
-			_hmtReHash(hm,index);
+			_hmt_rehash(hm,index);
 		}else{
-			_hmtNeedDetach(hm,index);
+			_hmt_need_detach(hm,index);
 		}
 		
 	}
 	return 0;
 }
-static struct wodHashMapEntry *
-_hmtQuery(struct wodHashMap * hm,int index,unsigned key)
+static struct wod_hashmap_entry *
+_hmt_query(struct wod_hash_map * hm,int index,unsigned key)
 {
-	struct wodHashMapTable * hmt = hm->tbs[index];
-	struct wodHashMapEntry * cut;
+	struct wod_hashmap_table * hmt = hm->tbs[index];
+	struct wod_hashmap_entry * cut;
 	unsigned i = hmtHashFunc(hmt,key);
 	cut = hmt->etys[i];
 	while(cut){
@@ -188,11 +188,11 @@ _hmtQuery(struct wodHashMap * hm,int index,unsigned key)
 	}
 	return NULL;
 }
-static struct wodHashMapEntry *
-_hmtRemove(struct wodHashMap * hm,int index,unsigned key)
+static struct wod_hashmap_entry *
+_hmt_remove(struct wod_hash_map * hm,int index,unsigned key)
 {
-	struct wodHashMapTable * hmt = hm->tbs[index];
-	struct wodHashMapEntry * cut,*pre;
+	struct wod_hashmap_table * hmt = hm->tbs[index];
+	struct wod_hashmap_entry * cut,*pre;
 	int i = hmtHashFunc(hmt,key);
 	cut = hmt->etys[i]; pre = NULL;
 	while(cut){
@@ -208,7 +208,7 @@ _hmtRemove(struct wodHashMap * hm,int index,unsigned key)
 	return NULL;
 }
 static void
-_hmtNeedDetach(struct wodHashMap  *hm,unsigned index)
+_hmt_need_detach(struct wod_hash_map  *hm,unsigned index)
 {
 	if(hm->tblen == hm->tbcap){
 		hm->tbcap*=2;
@@ -218,15 +218,15 @@ _hmtNeedDetach(struct wodHashMap  *hm,unsigned index)
 	hm->tblen++;
 	unsigned pre = 0;
 	if(index != 0) pre =hm->tbs[index-1]->hashkey;
-	hm->tbs[index] = _hmtNew((hm->tbs[index+1]->hashkey + pre)/2,hm->tbs[index+1]->cap/2);
-	_hmtDetach(hm,index,index+1);
+	hm->tbs[index] = _hmt_new((hm->tbs[index+1]->hashkey + pre)/2,hm->tbs[index+1]->cap/2);
+	_hmt_detach(hm,index,index+1);
 }
 static void
-_hmtDetach(struct wodHashMap *hm,int lindex,int rindex)
+_hmt_detach(struct wod_hash_map *hm,int lindex,int rindex)
 {
-	struct wodHashMapTable * hmtLft = hm->tbs[lindex];
-	struct wodHashMapTable * hmtRht = hm->tbs[rindex];
-	struct wodHashMapEntry * cut,*pre,*tmp;
+	struct wod_hashmap_table * hmtLft = hm->tbs[lindex];
+	struct wod_hashmap_table * hmtRht = hm->tbs[rindex];
+	struct wod_hashmap_entry * cut,*pre,*tmp;
 	int i;
 	for(i=0; i<hmtRht->cap;i++){
 		cut = hmtRht->etys[i]; pre = NULL;
@@ -234,7 +234,7 @@ _hmtDetach(struct wodHashMap *hm,int lindex,int rindex)
 			if( cut->tkey <= hmtLft->hashkey ){
 				tmp = cut;
 				cut = cut->next;
-				_hmtInsert(hm,lindex,tmp->tkey,tmp);
+				_hmt_insert(hm,lindex,tmp->tkey,tmp);
 				if(pre) pre->next = cut;
 				else 	hmtRht->etys[i]=cut;
 				continue;
@@ -246,18 +246,18 @@ _hmtDetach(struct wodHashMap *hm,int lindex,int rindex)
 }
 
 static void  
-_hmtReHash(struct wodHashMap * hm,int index)
+_hmt_rehash(struct wod_hash_map * hm,int index)
 {
-	struct wodHashMapEntry * cut,*tmp;
-	struct wodHashMapTable * hmt = hm->tbs[index];
-	hm->tbs[index] = _hmtNew(hmt->hashkey,hmt->cap*2);
+	struct wod_hashmap_entry * cut,*tmp;
+	struct wod_hashmap_table * hmt = hm->tbs[index];
+	hm->tbs[index] = _hmt_new(hmt->hashkey,hmt->cap*2);
 	int i;
 	for(i=0; i<hmt->cap;i++){
 		cut = hmt->etys[i];
 		while(cut){
 			tmp = cut;
 			cut = cut->next;
-			_hmtInsert(hm,index,tmp->tkey,tmp);
+			_hmt_insert(hm,index,tmp->tkey,tmp);
 		}
 	}
 	free(hmt->etys);

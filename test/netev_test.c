@@ -4,39 +4,39 @@
 #include <stdio.h>
 #include <errno.h>
 #define BUF_SZ 1024
-static void _doAccept(struct wodEvLoop *loop,void * nv,int mask);
-static void _doRead(struct wodEvLoop *loop,void * nv,int mask);
+static void _doAccept(struct wod_event_loop *loop,void * nv,int mask);
+static void _doRead(struct wod_event_loop *loop,void * nv,int mask);
 
 int 
 main(int argc, char const *argv[])
 {
-	struct wodEvLoop *loop;
-	loop = wodEvLoopNew(10240,WV_POLL_POLL);
+	struct wod_event_loop *loop;
+	loop = wod_event_loop_new(10240,WV_POLL_POLL);
 	if( !loop ){
 		printf("%s\n", "loop create error" );
 		return 1;
 	}
-	wodNetFd fd = wodNetTcpListen(TCP4,"0.0.0.0",8100);
+	wod_socket_t fd = wod_tcp_listen(TCP4,"0.0.0.0",8100);
 	if(fd < 0){
 		printf("%s\n", strerror(-fd) );
 		return 1;
 	}
 	printf("%d\n",fd);
-	wodNetSetNonBlock(fd,1);
-	wodEvIOAdd(loop,fd,WV_IO_READ,_doAccept,(void *)(intptr_t)(fd));
-	wodEvRun(loop);
+	wod_set_noblock(fd,1);
+	wod_event_io_add(loop,fd,WV_IO_READ,_doAccept,(void *)(intptr_t)(fd));
+	wod_event_loop_loop(loop);
 	return 0;
 }
 static void 
-_doAccept(struct wodEvLoop *loop,void * nv,int mask)
+_doAccept(struct wod_event_loop *loop,void * nv,int mask)
 {
-	wodNetFd fd = (wodNetFd)(long)(nv);
-	wodNetFd cfd = wodNetAccept(fd);
+	wod_socket_t fd = (wod_socket_t)(long)(nv);
+	wod_socket_t cfd = wod_accept(fd);
 	
 	if(cfd > 0){
 		printf("Connected : fd%d\n",cfd );
-		wodNetSetNonBlock(cfd,1);
-		wodEvIOAdd(loop,cfd,WV_IO_READ,_doRead,(void *)(intptr_t)(cfd));
+		wod_set_noblock(cfd,1);
+		wod_event_io_add(loop,cfd,WV_IO_READ,_doRead,(void *)(intptr_t)(cfd));
 		
 	}else if(cfd < 0 && -cfd == EAGAIN){
 		if(-cfd == EAGAIN){
@@ -47,14 +47,14 @@ _doAccept(struct wodEvLoop *loop,void * nv,int mask)
 	}
 }
 static void 
-_doRead(struct wodEvLoop *loop,void * nv,int mask)
+_doRead(struct wod_event_loop *loop,void * nv,int mask)
 {
-	wodNetFd fd = (wodNetFd)(long)(nv);
+	wod_socket_t fd = (wod_socket_t)(long)(nv);
 	unsigned char buf[BUF_SZ+1];
-	int nr = wodNetRead(fd,buf,BUF_SZ);
+	int nr = wod_read(fd,buf,BUF_SZ);
 	if( nr <= 0){
 		perror("read");
-		wodEvIORemove(loop,fd,WV_IO_READ);
+		wod_event_io_remove(loop,fd,WV_IO_READ);
 		return;
 	}
 	buf[nr] = 0;
