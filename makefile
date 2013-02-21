@@ -1,17 +1,30 @@
 BUILD=./build/
-all:deps $(BUILD)test_netev
-deps:
-	cd ./wodcontainer && $(MAKE) all
-	cd ./wodevent && $(MAKE) all
-	cd ./wodnet && $(MAKE) all
-	
+INC_DIR=-I./include
+LIB_DIR=-L./build
+SHARED=-fPIC -shared
+all : $(BUILD)libwod.so $(BUILD)test_netev $(BUILD)test_echo $(BUILD)test_array $(BUILD)test_hashmap
+
 install:
-	mkdir -p /usr/include/wod
-	cp ./wodnet/include/* ./wodevent/include/* ./wodcontainer/include/* /usr/include/wod
-	ln -s -f ./build/libwnet.so /lib/libwnet.so
-	ln -s -f ./build/libwct.so /lib/libwct.so
-	ln -s -f ./build/libwev.so /lib/libwev.so
+	cp ./include/*  /usr/include
+	ln -s -f $(BUILD)libwod.so /lib64/libwod.so
 clean:
 	rm $(BUILD)*
-$(BUILD)test_netev:./test/test_netev.c
-	gcc -o $@ $^ $(BUILD)libwev.so  $(BUILD)libwnet.so 
+
+
+SRCS=./container/array.c \
+				./container/cyclebuffer.c \
+				./container/hashmap.c \
+				./container/queue.c \
+				./event/ev.c \
+				./net/net_unix.c
+$(BUILD)libwod.so : $(SRCS)
+			$(CC) $(CFLAGS) $(INC_DIR) $(SHARED) -o $@ $^ 
+			
+$(BUILD)test_netev:./test/netev_test.c
+			$(CC) $(CFLAGS) $(INC_DIR) -o $@ $^ -lwod $(LIB_DIR)
+$(BUILD)test_echo:  ./test/net_test.c
+			$(CC) $(CFLAGS) $(INC_DIR) -o $@ $^ -lwod $(LIB_DIR)
+$(BUILD)test_array:  ./test/array_test.c
+			$(CC) $(CFLAGS) $(INC_DIR) -o $@ $^ -lwod $(LIB_DIR)
+$(BUILD)test_hashmap: ./test/hashmap_test.c
+			$(CC) $(CFLAGS) $(INC_DIR) -o $@ $^ -lwod $(LIB_DIR)
