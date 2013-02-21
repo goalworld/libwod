@@ -6,7 +6,7 @@ all : $(BUILD)libwod.so $(BUILD)test_netev $(BUILD)test_echo $(BUILD)test_array 
 
 install:
 	cp ./include/*  /usr/include
-	ln -s -f $(BUILD)libwod.so /lib64/libwod.so
+	cp $(BUILD)libwod.so /lib64
 clean:
 	rm $(BUILD)*
 
