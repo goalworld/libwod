@@ -28,7 +28,7 @@ int main()
 				continue;
 			}
 			rdbuf[nr] = 0;
-			printf("%s\n", rdbuf+4);
+			printf("%s\n", rdbuf);
 			wnWrite(cfd,rdbuf,nr);
 			wnClose(cfd);
 		}

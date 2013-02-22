@@ -2,7 +2,7 @@ BUILD=./build/
 INC_DIR=-I./include
 LIB_DIR=-L./build
 SHARED=-fPIC -shared
-all : $(BUILD)libwod.so $(BUILD)test_netev $(BUILD)test_echo $(BUILD)test_array $(BUILD)test_hashmap
+all : $(BUILD)libwod.so $(BUILD)test_netev $(BUILD)test_echo $(BUILD)test_array $(BUILD)test_hashmap $(BUILD)test_cli
 
 install:
 	cp ./include/*  /usr/include
@@ -23,6 +23,8 @@ $(BUILD)libwod.so : $(SRCS)
 $(BUILD)test_netev:./test/netev_test.c
 			$(CC) $(CFLAGS) $(INC_DIR) -o $@ $^ -lwod $(LIB_DIR)
 $(BUILD)test_echo:  ./test/net_test.c
+			$(CC) $(CFLAGS) $(INC_DIR) -o $@ $^ -lwod $(LIB_DIR)
+$(BUILD)test_cli:  ./test/net_cli_test.c
 			$(CC) $(CFLAGS) $(INC_DIR) -o $@ $^ -lwod $(LIB_DIR)
 $(BUILD)test_array:  ./test/array_test.c
 			$(CC) $(CFLAGS) $(INC_DIR) -o $@ $^ -lwod $(LIB_DIR)

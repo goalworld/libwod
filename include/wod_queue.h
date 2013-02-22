@@ -8,18 +8,18 @@
 #ifndef RAIN_QUEUE_H_
 #define RAIN_QUEUE_H_
 
-typedef struct wcQueue
+struct wcQueue
 {
 	void * q_buf;
 	int q_cut;
 	int q_end;
 	int q_len;
 	int q_elemsize;
-}wcQueue;
+};
 typedef void wcQueueElemDelFn(void *elem);
-int 		wcQueueInit		(wcQueue *que, unsigned elemsize);
-void 		wcQueueDestroy	(wcQueue *que, wcQueueElemDelFn fn);
-void 		wcQueuePush		(wcQueue *que, void *elem);
-int 		wcQueuePop		(wcQueue *que, void *elem);
-unsigned 	wcQueueSize		(wcQueue *que );
+int 		wcQueueInit		(struct wcQueue *que, unsigned elemsize);
+void 		wcQueueDestroy	(struct wcQueue *que, wcQueueElemDelFn fn);
+void 		wcQueuePush		(struct wcQueue *que, void *elem);
+int 		wcQueuePop		(struct wcQueue *que, void *elem);
+unsigned 	wcQueueSize		(struct wcQueue *que );
 #endif /* RAIN_QUEUE_H_ */

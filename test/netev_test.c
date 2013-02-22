@@ -58,5 +58,5 @@ _doRead(struct wvLoop *loop,void * nv,int mask)
 		return;
 	}
 	buf[nr] = 0;
-	printf("%s\n", buf+4);
+	printf("read===> %s %d\n", buf,nr);
 }
