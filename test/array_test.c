@@ -5,19 +5,19 @@
 
 int main(int argc, char const *argv[])
 {
-	struct wcArray arr;
-	wcArrayInit(&arr,sizeof(int));
+	struct wodArray arr;
+	wodArrayInit(&arr,sizeof(int));
 	int i ,j;
 	for( i=0; i< 10000; i++ ){
 		if(i %2 ){
-			wcArrayPush(&arr,&i);
+			wodArrayPush(&arr,&i);
 		}else{
-			wcArrayUnShift(&arr,&i);
+			wodArrayUnShift(&arr,&i);
 		}
-		printf(" size %d\n", wcArraySize(&arr));
+		printf(" size %d\n", wodArraySize(&arr));
 	}
 	for( i=0;i< 10000;i++){
-		wcArrayAt(&arr,i,&j);
+		wodArrayAt(&arr,i,&j);
 		printf("[%d:%d]\n", i,j);
 	}
 	return 0;

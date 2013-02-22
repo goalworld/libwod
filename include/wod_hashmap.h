@@ -1,22 +1,27 @@
-#ifndef _HASH_MAP_
-#define _HASH_MAP_
-struct wcHashMapEntry
+/*
+Date:2013.2.2
+Auther:goalworld
+
+*/
+#ifndef _WOD__HASH_MAP_
+#define _WOD__HASH_MAP_
+struct wodHashMapEntry
 {
 	struct{
 		const void *key;
 		const void *value;
 	}kv;
 	unsigned tkey;
-	struct wcHashMapEntry *next;
+	struct wodHashMapEntry *next;
 };
-struct wcHashMapTable
+struct wodHashMapTable
 {
-	struct wcHashMapEntry** etys;
+	struct wodHashMapEntry** etys;
 	unsigned used;
 	unsigned cap;
 	unsigned hashkey;
 };
-struct wcHashMapType
+struct wodHashMapType
 {
 	unsigned 	(*hashFunc)(void *env,const void *key);
 	int 		(*keyCampre)(void *env,const void *key1,const void *key2);
@@ -25,18 +30,18 @@ struct wcHashMapType
 	void 		(*keyDestroy)(void *env,const void *key);
 	void 		(*valueDestroy)(void *env,const void *value);
 };
-struct wcHashMap
+struct wodHashMap
 {
-	struct wcHashMapType ktype;
+	struct wodHashMapType ktype;
 	void * ktenv;
-	struct wcHashMapTable** tbs;
+	struct wodHashMapTable** tbs;
 	unsigned tblen;
 	unsigned tbcap;
 };
-struct wcHashMap * wcHashMapNew(struct wcHashMapType hmt,void *hmtenv);
-void 	wcHashMapDelete(struct wcHashMap * hm);
-int 	wcHashMapInsert(struct wcHashMap * hm,const void *key,const void *value);
-void * 	wcHashMapQuery(struct wcHashMap *hm,const void *key);
-void * 	wcHashMapRemove(struct wcHashMap *hm,const void *key);
-unsigned wcHashMapSize(struct wcHashMap *hm);
+struct wodHashMap * wodHashMapNew(struct wodHashMapType hmt,void *hmtenv);
+void 	wodHashMapDelete(struct wodHashMap * hm);
+int 	wodHashMapInsert(struct wodHashMap * hm,const void *key,const void *value);
+void * 	wodHashMapQuery(struct wodHashMap *hm,const void *key);
+void * 	wodHashMapRemove(struct wodHashMap *hm,const void *key);
+unsigned wodHashMapSize(struct wodHashMap *hm);
 #endif

@@ -13,7 +13,7 @@
 #include <memory.h>
 #define BUF_SZ 64
 int
-wcQueueInit(struct wcQueue *que,unsigned elemsize)
+wodQueueInit(struct wodQueue *que,unsigned elemsize)
 {
 	assert(que);
 	que->q_buf = malloc(BUF_SZ * elemsize);
@@ -27,7 +27,7 @@ wcQueueInit(struct wcQueue *que,unsigned elemsize)
 	return 0;
 }
 void
-wcQueueDestroy(struct wcQueue *que,wcQueueElemDelFn del_fn){
+wodQueueDestroy(struct wodQueue *que,wodQueueElemDelFn del_fn){
 	assert(que);
 	if(del_fn){
 		int cut = que->q_cut;
@@ -40,7 +40,7 @@ wcQueueDestroy(struct wcQueue *que,wcQueueElemDelFn del_fn){
 
 }
 void
-wcQueuePush(struct wcQueue * que,void *elem)
+wodQueuePush(struct wodQueue * que,void *elem)
 {
 	memcpy((uint8_t*)que->q_buf + que->q_end*que->q_elemsize,elem,que->q_elemsize );
 	que->q_end = (que->q_end+1)%que->q_len;
@@ -62,7 +62,7 @@ wcQueuePush(struct wcQueue * que,void *elem)
 	}
 }
 int
-wcQueuePop(struct wcQueue * que,void *elem)
+wodQueuePop(struct wodQueue * que,void *elem)
 {
 	assert(que && elem);
 	if(que->q_cut == que->q_end){
@@ -73,7 +73,7 @@ wcQueuePop(struct wcQueue * que,void *elem)
 	return 0;
 }
 unsigned
-wcQueueSize( struct wcQueue * que )
+wodQueueSize( struct wodQueue * que )
 {
 	if(que->q_cut <= que->q_end){
 		return que->q_end - que->q_cut;

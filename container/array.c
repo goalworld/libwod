@@ -11,7 +11,7 @@
 #include <string.h>
 #include <stdlib.h>
 void
-wcArrayInit(struct wcArray *arr,int elemsz)
+wodArrayInit(struct wodArray *arr,int elemsz)
 {
 	assert(arr);
 	arr->elem_sz = elemsz;
@@ -20,7 +20,7 @@ wcArrayInit(struct wcArray *arr,int elemsz)
 	arr->cut_sz = 0;
 }
 static inline void
-_add_size(struct wcArray *arr,int elem)
+_add_size(struct wodArray *arr,int elem)
 {
 	if(elem <= arr->arr_sz){
 		return;
@@ -36,13 +36,13 @@ _add_size(struct wcArray *arr,int elem)
 	}
 }
 void
-wcArrayDestroy(struct wcArray *arr)
+wodArrayDestroy(struct wodArray *arr)
 {
 	assert(arr);
 	free(arr->arr_data);
 }
 void
-wcArrayPush(struct wcArray *arr,void *elem)
+wodArrayPush(struct wodArray *arr,void *elem)
 {
 	assert(arr);
 	_add_size(arr,arr->cut_sz+1);
@@ -52,7 +52,7 @@ wcArrayPush(struct wcArray *arr,void *elem)
 	arr->cut_sz++;
 }
 void
-wcArrayAt(struct wcArray *arr,int index,void *elem)
+wodArrayAt(struct wodArray *arr,int index,void *elem)
 {
 	assert(arr && index<arr->cut_sz);
 	memcpy(elem,
@@ -60,7 +60,7 @@ wcArrayAt(struct wcArray *arr,int index,void *elem)
 			arr->elem_sz);
 }
 void
-wcArraySet(struct wcArray *arr,int index,void *elem)
+wodArraySet(struct wodArray *arr,int index,void *elem)
 {
 	assert(arr && index<=arr->cut_sz);
 	memcpy((char*)(arr->arr_data)+arr->elem_sz*index,
@@ -68,7 +68,7 @@ wcArraySet(struct wcArray *arr,int index,void *elem)
 			arr->elem_sz);
 }
 void
-wcArrayUnShift(struct wcArray *arr,void *elem)
+wodArrayUnShift(struct wodArray *arr,void *elem)
 {
 	assert(arr);
 	_add_size(arr,arr->cut_sz+1);
@@ -81,7 +81,7 @@ wcArrayUnShift(struct wcArray *arr,void *elem)
 	arr->cut_sz++;
 }
 void
-wcArrayErase(struct wcArray *arr,int index,int numelem,void *elem)
+wodArrayErase(struct wodArray *arr,int index,int numelem,void *elem)
 {
 	assert(arr && index<=arr->cut_sz && numelem <= arr->cut_sz-index);
 	if(elem){
@@ -97,7 +97,7 @@ wcArrayErase(struct wcArray *arr,int index,int numelem,void *elem)
 	arr->cut_sz-=numelem;
 }
 void
-wcArrayInsert(struct wcArray *arr,int index,void *elem,int numelem)
+wodArrayInsert(struct wodArray *arr,int index,void *elem,int numelem)
 {
 	assert(arr && index<=arr->cut_sz);
 	_add_size(arr,arr->cut_sz+numelem);
@@ -110,7 +110,7 @@ wcArrayInsert(struct wcArray *arr,int index,void *elem,int numelem)
 	arr->cut_sz+=numelem;
 }
 unsigned
-wcArraySize(struct wcArray *arr)
+wodArraySize(struct wodArray *arr)
 {
 	assert(arr);
 	return arr->cut_sz;

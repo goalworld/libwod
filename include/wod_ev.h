@@ -1,12 +1,12 @@
 /*
- * wv.h
+ * wodEv.h
  *
  *  Created on: 2012-10-23
  *      Author: goalworld
  */
 
-#ifndef WODEV_H_
-#define WODEV_H_
+#ifndef _WOD_WODEV_H_
+#define _WOD_WODEV_H_
 
 #include <stddef.h>
 enum {
@@ -15,7 +15,7 @@ enum {
 	WV_IO_READ=0X01,
 #define WV_IO_READ 0X01
 	WV_IO_WRITE=0X02
-#define WV_IO_WRITE 0X01
+#define WV_IO_WRITE 0X02
 };
 enum{
 	WV_ROK = 0
@@ -27,23 +27,23 @@ enum{
 	WV_POLL_POLL,
 	WV_POLL_KQUEUE
 };
-struct wvLoop;
+struct wodEvLoop;
 
-typedef void (*wvIOFn)(struct wvLoop *loop,void * nv,int mask);
-typedef int (*wvTimeFn)(struct wvLoop *loop,void * nv);
-typedef int (*wvUserDefFn)(struct wvLoop *loop,void * nv);
+typedef void (*wodEvIOFn)(struct wodEvLoop *loop,void * nv,int mask);
+typedef int (*wodEvTimeFn)(struct wodEvLoop *loop,void * nv);
+typedef int (*wodEvUserDefFn)(struct wodEvLoop *loop,void * nv);
 
-struct wvLoop * wvLoopNew(int set_size,int type);
-void wvLoopDel(struct wvLoop *);
-void wvRun(struct wvLoop *);
-void wvStop(struct wvLoop *);
+struct wodEvLoop * wodEvLoopNew(int set_size,int type);
+void wodEvLoopDel(struct wodEvLoop *);
+void wodEvRun(struct wodEvLoop *);
+void wodEvStop(struct wodEvLoop *);
 
-int wvIOAdd(struct wvLoop *,int fd,int event,wvIOFn cb,void *cbArg);
-void wvIORemove(struct wvLoop *,int id,int event);
-int wvIOWait(int fd,int mask,long long timeout);
-int wvTimeAdd(struct wvLoop *,int sec,int usec,wvTimeFn cb,void *cbArg);
-void wvTimeRemove(struct wvLoop *,int id);
-int wvUserDefAdd(struct wvLoop *,wvUserDefFn cb,void *cbArg);
-void wvUserDefRemove(struct wvLoop *,int id);
+int wodEvIOAdd(struct wodEvLoop *,int fd,int event,wodEvIOFn cb,void *cbArg);
+void wodEvIORemove(struct wodEvLoop *,int id,int event);
+int wodEvIOWait(int fd,int mask,long long timeout);
+int wodEvTimeAdd(struct wodEvLoop *,int sec,int usec,wodEvTimeFn cb,void *cbArg);
+void wodEvTimeRemove(struct wodEvLoop *,int id);
+int wodEvUserDefAdd(struct wodEvLoop *,wodEvUserDefFn cb,void *cbArg);
+void wodEvUserDefRemove(struct wodEvLoop *,int id);
 
 #endif /* GODEV_H_ */

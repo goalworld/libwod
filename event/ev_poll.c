@@ -41,7 +41,7 @@ void _arrPush(struct pollData *pdata,int fd,int events)
 	pdata->len++;
 }
 static int 
-pollNew(struct wvLoop * loop,int falg)
+pollNew(struct wodEvLoop * loop,int falg)
 {
 	struct pollData * p = malloc(sizeof(struct pollData));
 	assert(p);
@@ -52,14 +52,14 @@ pollNew(struct wvLoop * loop,int falg)
 	return WV_ROK;
 }
 static void 
-pollDel(struct wvLoop *loop)
+pollDel(struct wodEvLoop *loop)
 {
 	struct pollData * p = ( struct pollData *)loop->pollorData;
 	free(p->pfdArr);
 	free(p);
 }
 static int 
-pollAdd(struct wvLoop *loop,int fd,int mask)
+pollAdd(struct wodEvLoop *loop,int fd,int mask)
 {
 	
 	struct pollData * p = ( struct pollData *)loop->pollorData;
@@ -79,7 +79,7 @@ pollAdd(struct wvLoop *loop,int fd,int mask)
 	return WV_ROK;
 }
 static int 
-pollRemove(struct wvLoop *loop , int fd,int mask)
+pollRemove(struct wodEvLoop *loop , int fd,int mask)
 {
 	struct pollData * p = (struct pollData *)loop->pollorData;
 	mask =(loop->files[fd].event & (~mask));
@@ -102,12 +102,12 @@ pollRemove(struct wvLoop *loop , int fd,int mask)
 	return -EINVAL;
 }
 static  int 
-pollPoll(struct wvLoop *loop,double timeOut)
+pollPoll(struct wodEvLoop *loop,double timeOut)
 {
 	struct pollData * p = (struct pollData *)loop->pollorData;
 	
 	int numelm = 0;
-	struct wvIO * pio;
+	struct wodEvIO * pio;
 	struct pollfd * cut;
 	int i = 0;
 	int ret = poll(p->pfdArr,p->len, timeOut*1E3);

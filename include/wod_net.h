@@ -10,37 +10,38 @@ Auther:goalworld
 
 #if HAS_OS_WINDOWS
 #define <windows.h>
-typedef SOCKET wnFd;
+typedef SOCKET wodNetFd;
 #else
-typedef int wnFd;
+typedef int wodNetFd;
 #endif
 
-enum wnTCP{
+enum wodNetTCP{
 	TCP4,
 	TCP6
 };
-struct wnBuf{
+struct wodNetBuf{
 	void * b_body;
 	size_t b_sz;
 };
-wnFd wnTcpListen(enum wnTCP,const char * addr,int port);
-wnFd wnTcpConnect(enum wnTCP,const char * addr,int port);
-wnFd wnAccept( wnFd fd);
+wodNetFd wodNetTcpListen(enum wodNetTCP,const char * addr,int port);
+wodNetFd wodNetTcpConnect(enum wodNetTCP,const char * addr,int port);
+wodNetFd wodNetAccept( wodNetFd fd);
+int  wodNetClose(wodNetFd fd);
 
-int  wnRemoteAddr(wnFd fd,char * strptr,size_t len,int *port);
-int  wnLocateAddr(wnFd fd,char * strptr,size_t len,int *port);
-int  wnWritev(wnFd fd ,struct wnBuf *bufs,size_t bufslen);
-int  wnWrite(wnFd fd,void *buf,size_t sz);
-int  wnReadv(wnFd fd,struct wnBuf *bufs,size_t bufslen);
-int  wnRead(wnFd fd,void *buf,size_t sz);
+int  wodNetRemoteAddr(wodNetFd fd,char * strptr,size_t len,int *port);
+int  wodNetLocateAddr(wodNetFd fd,char * strptr,size_t len,int *port);
+int  wodNetWritev(wodNetFd fd ,struct wodNetBuf *bufs,size_t bufslen);
+int  wodNetWrite(wodNetFd fd,void *buf,size_t sz);
+int  wodNetReadv(wodNetFd fd,struct wodNetBuf *bufs,size_t bufslen);
+int  wodNetRead(wodNetFd fd,void *buf,size_t sz);
 
-int  wnReadFull(wnFd fd,void *buf,size_t sz);
+int  wodNetReadFull(wodNetFd fd,void *buf,size_t sz);
 
-int  wnClose(wnFd fd);
-int  wnSetKeepAlive(wnFd fd,int flag);//0,1
-int  wnSetNoDelay(wnFd fd,int flag);//0,1
-int  wnSetNonBlock(wnFd fd,int flag);//0,1
-int  wnSetRcvBuf(wnFd fd,int flag);//SIZE
-int  wnSetSndBuf(wnFd fd,int flag);//SIZE
+
+int  wodNetSetKeepAlive(wodNetFd fd,int flag);//0,1
+int  wodNetSetNoDelay(wodNetFd fd,int flag);//0,1
+int  wodNetSetNonBlock(wodNetFd fd,int flag);//0,1
+int  wodNetSetRcvBuf(wodNetFd fd,int flag);//SIZE
+int  wodNetSetSndBuf(wodNetFd fd,int flag);//SIZE
 
 #endif

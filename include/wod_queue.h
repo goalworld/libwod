@@ -1,14 +1,14 @@
 /*
- * rain_queue.h
+ * wod_queue.h
  *
  *  Created on: 2013-1-17
  *      Author: wd
  */
 
-#ifndef RAIN_QUEUE_H_
-#define RAIN_QUEUE_H_
+#ifndef _WOD__QUEUE_H_
+#define _WOD__QUEUE_H_
 
-struct wcQueue
+struct wodQueue
 {
 	void * q_buf;
 	int q_cut;
@@ -16,10 +16,10 @@ struct wcQueue
 	int q_len;
 	int q_elemsize;
 };
-typedef void wcQueueElemDelFn(void *elem);
-int 		wcQueueInit		(struct wcQueue *que, unsigned elemsize);
-void 		wcQueueDestroy	(struct wcQueue *que, wcQueueElemDelFn fn);
-void 		wcQueuePush		(struct wcQueue *que, void *elem);
-int 		wcQueuePop		(struct wcQueue *que, void *elem);
-unsigned 	wcQueueSize		(struct wcQueue *que );
+typedef void wodQueueElemDelFn(void *elem);
+int 		wodQueueInit		(struct wodQueue *que, unsigned elemsize);
+void 		wodQueueDestroy	(struct wodQueue *que, wodQueueElemDelFn fn);
+void 		wodQueuePush		(struct wodQueue *que, void *elem);
+int 		wodQueuePop		(struct wodQueue *que, void *elem);
+unsigned 	wodQueueSize		(struct wodQueue *que );
 #endif /* RAIN_QUEUE_H_ */

@@ -1,5 +1,5 @@
 /*
- * wv_inner.h
+ * wodEv_inner.h
  *
  *  Created on: 2012-10-23
  *      Author: goalworld
@@ -7,54 +7,54 @@
 
 #ifndef WODEV_INNER_H_
 #define WODEV_INNER_H_
-#include "wod_ev.h"
+#include "../include/wod_ev.h"
 #define HASH_SIZE 32
 #define SLEEP 1E1//1ms
-struct wvLoop;
-struct wvPoller{
-	int (*New)(struct wvLoop * loop,int flag);
-	void (*Del)(struct wvLoop *loop);
-	int (*Add)(struct wvLoop *loop,int fd,int mask);
-	int	(*Remove)(struct wvLoop *loop , int fd,int mask);
-	int (*Poll)(struct wvLoop *loop,double timeOut);
+struct wodEvLoop;
+struct wodEvPoller{
+	int (*New)(struct wodEvLoop * loop,int flag);
+	void (*Del)(struct wodEvLoop *loop);
+	int (*Add)(struct wodEvLoop *loop,int fd,int mask);
+	int	(*Remove)(struct wodEvLoop *loop , int fd,int mask);
+	int (*Poll)(struct wodEvLoop *loop,double timeOut);
 };
-struct wvTime{
+struct wodEvTime{
 	int id;
-	wvTimeFn timeProc;
+	wodEvTimeFn timeProc;
 	void * timeArg;
 	double sec;
 	double passSec;
 	double cutClock;
 	int dispose;
 	int repetTims;
-	struct wvTime *next;
+	struct wodEvTime *next;
 };
-struct wvIO{
+struct wodEvIO{
 	int fd;
-	wvIOFn readProc;
+	wodEvIOFn readProc;
 	void * readArg;
-	wvIOFn writeProc;
+	wodEvIOFn writeProc;
 	void * writeArg;
 	int event;//WV_NONE
 	int revent;//WV_NONE
 };
-struct wvUserDef{
+struct wodEvUserDef{
 	int id;
-	wvUserDefFn idluceProc;
+	wodEvUserDefFn idluceProc;
 	int dispose;
 	void * userdefArg;
-	struct wvUserDef * next;
+	struct wodEvUserDef * next;
 };
-struct wvLoop{
-	struct wvPoller pollor;
+struct wodEvLoop{
+	struct wodEvPoller pollor;
 	void * pollorData;
 	int isQuit;
 	int set_size;
-	struct wvIO * files;
+	struct wodEvIO * files;
 	int *pendFds;
 	int idIndex;
-	struct wvUserDef * userdefHead;
-	struct wvTime* hashMap[HASH_SIZE];
+	struct wodEvUserDef * userdefHead;
+	struct wodEvTime* hashMap[HASH_SIZE];
 	int used;
 	double minSec;
 };

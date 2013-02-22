@@ -1,5 +1,5 @@
 /*
- * wv.c
+ * wodEv.c
  *
  *  Created on: 2012-10-23
  *      Author: goalworld
@@ -12,8 +12,8 @@
 #include <unistd.h>
 #include <errno.h>
 
-static int _initPollor(struct wvPoller* pllor,int type);
-static inline void _wv_sleep(int usec){
+static int _initPollor(struct wodEvPoller* pllor,int type);
+static inline void _wodEv_sleep(int usec){
 	if( usec <= 0 ){
 		return ;
 	}
@@ -22,7 +22,7 @@ static inline void _wv_sleep(int usec){
 	tv.tv_usec = usec - tv.tv_sec*1000000;
 	select(0,NULL,NULL,NULL,&tv);
 }
-static double inline wvGetTime(){
+static double inline wodEvGetTime(){
 	struct timeval time;
 	gettimeofday(&time,NULL);
 	return time.tv_sec + time.tv_usec * 1E-6;
@@ -30,8 +30,8 @@ static double inline wvGetTime(){
 static inline int _hashFunction(int id){
 	return id%HASH_SIZE;
 }
-struct wvLoop * wvLoopNew(int set_size,int type){
-	struct wvLoop * loop = malloc(sizeof(struct wvLoop));
+struct wodEvLoop * wodEvLoopNew(int set_size,int type){
+	struct wodEvLoop * loop = malloc(sizeof(struct wodEvLoop));
 	int ret = _initPollor(&loop->pollor,type);
 	if(ret != WV_ROK){
 		free(loop);
@@ -47,7 +47,7 @@ struct wvLoop * wvLoopNew(int set_size,int type){
 	}
 	
 	
-	loop->files = malloc(sizeof(struct wvIO) *set_size);
+	loop->files = malloc(sizeof(struct wodEvIO) *set_size);
 	loop->pendFds = malloc(sizeof(int) *set_size);
 	int i=0;
 	for(i=0; i< loop->set_size; i++){
@@ -59,18 +59,18 @@ struct wvLoop * wvLoopNew(int set_size,int type){
 	loop->minSec = SLEEP;
 	return loop;
 }
-void wvLoopDelete(struct wvLoop *loop){
+void wodEvLoopDelete(struct wodEvLoop *loop){
 	loop->pollor.Del(loop);
 	free(loop);
 }
-static void _processIO(struct wvLoop *loop,double runSec){
+static void _processIO(struct wodEvLoop *loop,double runSec){
 	double tmpSec = loop->minSec - runSec;
 	if(tmpSec < 0.0 ){
 		tmpSec = 0.0;
 	}
 	if(loop->used){
 		int ret = loop->pollor.Poll(loop,tmpSec);
-		struct wvIO * fev;
+		struct wodEvIO * fev;
 		for(;ret>0;ret--){
 			fev = &loop->files[loop->pendFds[ret-1]];
 			if(fev->event & fev->revent & WV_IO_READ){
@@ -82,11 +82,11 @@ static void _processIO(struct wvLoop *loop,double runSec){
 		}
 	}else{
 		int usec = tmpSec*1E6 - 100;
-		_wv_sleep(usec);
+		_wodEv_sleep(usec);
 	}
 }
-static void _processIdle(struct wvLoop *loop){
-	struct wvUserDef*tmp=loop->userdefHead,*pre = NULL,*next;
+static void _processIdle(struct wodEvLoop *loop){
+	struct wodEvUserDef*tmp=loop->userdefHead,*pre = NULL,*next;
 	while(tmp){
 		next = tmp->next;
 		if(!tmp->dispose){
@@ -103,15 +103,15 @@ static void _processIdle(struct wvLoop *loop){
 		tmp = next;
 	}
 }
-static void _processTime(struct wvLoop *loop){
+static void _processTime(struct wodEvLoop *loop){
 	int i =0;
 	loop->minSec = SLEEP;
 	for(i=0;i<HASH_SIZE;i++){
-		struct wvTime*tmp=loop->hashMap[i],*pre = NULL,*next;
+		struct wodEvTime*tmp=loop->hashMap[i],*pre = NULL,*next;
 		while(tmp){
 			next = tmp->next;
 			if(!tmp->dispose){
-				double cutClock = wvGetTime();
+				double cutClock = wodEvGetTime();
 				tmp->passSec += cutClock-tmp->cutClock;
 				tmp->cutClock = cutClock;
 				double tmpSec;
@@ -139,25 +139,25 @@ static void _processTime(struct wvLoop *loop){
 		}
 	}
 }
-void wvRun(struct wvLoop *loop){
+void wodEvRun(struct wodEvLoop *loop){
 	double space = 0.0;
 	while(!loop->isQuit){
-		double  preSec = wvGetTime();
+		double  preSec = wodEvGetTime();
 		_processTime(loop);
 		_processIO(loop,space);
 		_processIdle(loop);
-		space =  wvGetTime() - preSec;
+		space =  wodEvGetTime() - preSec;
 	}
 }
-void wvStop(struct wvLoop *loop){
+void wodEvStop(struct wodEvLoop *loop){
 	loop->isQuit = 1;
 }
 
-int wvIOAdd(struct wvLoop *loop,int fd,int event,wvIOFn cb,void *cbArg){
+int wodEvIOAdd(struct wodEvLoop *loop,int fd,int event,wodEvIOFn cb,void *cbArg){
 	if(fd > loop->set_size || fd <= 0 || !cb){
 		return -EINVAL;
 	}
-	struct wvIO *pFile = &loop->files[fd];
+	struct wodEvIO *pFile = &loop->files[fd];
 	pFile->fd = fd;
 	int ret = loop->pollor.Add(loop,fd,event);
 	if(ret != WV_ROK){
@@ -178,11 +178,11 @@ int wvIOAdd(struct wvLoop *loop,int fd,int event,wvIOFn cb,void *cbArg){
 
 	return fd;
 }
-void wvIORemove(struct wvLoop *loop,int id,int event){
+void wodEvIORemove(struct wodEvLoop *loop,int id,int event){
 	if(id > loop->set_size){
 		return ;
 	}
-	struct wvIO *pFile = &loop->files[id];
+	struct wodEvIO *pFile = &loop->files[id];
 	if(pFile->event & event){
 		loop->pollor.Remove(loop,pFile->fd,event);
 		pFile->event &= (~event);
@@ -192,13 +192,13 @@ void wvIORemove(struct wvLoop *loop,int id,int event){
 	}
 }
 
-int wvTimeAdd(struct wvLoop *loop,int sec,int usec,wvTimeFn cb,void *cbArg){
+int wodEvTimeAdd(struct wodEvLoop *loop,int sec,int usec,wodEvTimeFn cb,void *cbArg){
 	if(!cb){
 		return -EINVAL;
 	}
-	struct wvTime * pTime = malloc(sizeof(struct wvTime));
+	struct wodEvTime * pTime = malloc(sizeof(struct wodEvTime));
 	pTime->id = loop->idIndex++;
-	pTime->cutClock = wvGetTime();
+	pTime->cutClock = wodEvGetTime();
 	pTime->sec = sec + usec*1E-6;
 	pTime->passSec = 0.0;
 	pTime->timeArg = cbArg;
@@ -209,9 +209,9 @@ int wvTimeAdd(struct wvLoop *loop,int sec,int usec,wvTimeFn cb,void *cbArg){
 	loop->hashMap[hash] = pTime;
 	return pTime->id;
 }
-void wvTimeRemove(struct wvLoop * loop,int id){
+void wodEvTimeRemove(struct wodEvLoop * loop,int id){
 	int hash = _hashFunction(id);
-	struct wvTime*tmp=loop->hashMap[hash];
+	struct wodEvTime*tmp=loop->hashMap[hash];
 	while(tmp){
 		if(tmp->id == id){
 			tmp->dispose = 1;
@@ -220,11 +220,11 @@ void wvTimeRemove(struct wvLoop * loop,int id){
 	}
 }
 
-int wvUserDefAdd(struct wvLoop *loop,wvUserDefFn cb,void *cbArg){
+int wodEvUserDefAdd(struct wodEvLoop *loop,wodEvUserDefFn cb,void *cbArg){
 	if(!cb){
 		return -EINVAL;
 	}
-	struct wvUserDef * pIdle = malloc(sizeof(struct wvUserDef));
+	struct wodEvUserDef * pIdle = malloc(sizeof(struct wodEvUserDef));
 	pIdle->next = loop->userdefHead;
 	loop->userdefHead  = pIdle;
 	pIdle->id = loop->idIndex++;
@@ -233,8 +233,8 @@ int wvUserDefAdd(struct wvLoop *loop,wvUserDefFn cb,void *cbArg){
 	pIdle->dispose = 0;
 	return pIdle->id;
 }
-void wvUserDefRemove(struct wvLoop *loop,int id){
-	struct wvUserDef*tmp=loop->userdefHead;
+void wodEvUserDefRemove(struct wodEvLoop *loop,int id){
+	struct wodEvUserDef*tmp=loop->userdefHead;
 	while(tmp){
 		if(tmp->id == id){
 			tmp->dispose = 1;
@@ -254,7 +254,7 @@ void wvUserDefRemove(struct wvLoop *loop,int id){
 #if HAS_POLL
 #include "ev_poll.c"
 #endif
-static int _initPollor(struct wvPoller* pllor,int type){
+static int _initPollor(struct wodEvPoller* pllor,int type){
 	if(type == WV_POLL_EPOLL){
 #if HAS_EPOLL
 		SET_POLLER(poller,epoll);

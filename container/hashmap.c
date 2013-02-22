@@ -5,22 +5,22 @@
 #include <assert.h>
 #define MAX_LENGTH 1024*1024
 
-static struct wcHashMapTable *  _hmtNew(unsigned key,unsigned sz);
-static void _hmtDelete(struct wcHashMap * hm,struct wcHashMapTable * hmt);
-static void  _hmtReHash(struct wcHashMap * hm,int index);
-static void _hmtDetach(struct wcHashMap *hm,int lindex,int rindex);
-static struct wcHashMapEntry *  _hmtRemove(struct wcHashMap * hm,int lindex,unsigned key);
-static struct wcHashMapEntry *  _hmtQuery(struct wcHashMap * hm,int lindex,unsigned key);
-static int _hmtInsert(struct wcHashMap * hm,int index,unsigned key ,struct wcHashMapEntry * entry);
-static void _hmtNeedDetach(struct wcHashMap  *hm,unsigned index);
+static struct wodHashMapTable *  _hmtNew(unsigned key,unsigned sz);
+static void _hmtDelete(struct wodHashMap * hm,struct wodHashMapTable * hmt);
+static void  _hmtReHash(struct wodHashMap * hm,int index);
+static void _hmtDetach(struct wodHashMap *hm,int lindex,int rindex);
+static struct wodHashMapEntry *  _hmtRemove(struct wodHashMap * hm,int lindex,unsigned key);
+static struct wodHashMapEntry *  _hmtQuery(struct wodHashMap * hm,int lindex,unsigned key);
+static int _hmtInsert(struct wodHashMap * hm,int index,unsigned key ,struct wodHashMapEntry * entry);
+static void _hmtNeedDetach(struct wodHashMap  *hm,unsigned index);
 
 
 
 
-struct wcHashMap * 
-wcHashMapNew(struct wcHashMapType hmt,void *hmtenv)
+struct wodHashMap *
+wodHashMapNew(struct wodHashMapType hmt,void *hmtenv)
 {
-	struct wcHashMap * hm = malloc(sizeof(struct wcHashMap));
+	struct wodHashMap * hm = malloc(sizeof(struct wodHashMap));
 	hm->ktenv = hmtenv;
 	hm->ktype = hmt;
 	hm->tblen = 4;
@@ -34,7 +34,7 @@ wcHashMapNew(struct wcHashMapType hmt,void *hmtenv)
 	return hm;
 }
 static inline unsigned
- first_hash_func(struct wcHashMap * hm,const void *inkey){
+ first_hash_func(struct wodHashMap * hm,const void *inkey){
  	unsigned key = hm->ktype.hashFunc(hm->ktenv,inkey);
  	//Tomas Wang
 	key += ~(key << 15);
@@ -47,7 +47,7 @@ static inline unsigned
  }
 
 void 	
-wcHashMapDelete(struct wcHashMap * hm)
+wodHashMapDelete(struct wodHashMap * hm)
 {
 	int i = 0;
 	for(;i<hm->tblen;i++){
@@ -57,7 +57,7 @@ wcHashMapDelete(struct wcHashMap * hm)
 	free(hm);
 }
 unsigned 
-wcHashMapSize(struct wcHashMap *hm)
+wodHashMapSize(struct wodHashMap *hm)
 {
 	unsigned sz = 0;
 	int i=0;
@@ -67,9 +67,9 @@ wcHashMapSize(struct wcHashMap *hm)
 	return sz;
 }
 int 	
-wcHashMapInsert(struct wcHashMap * hm,const void *key,const void *value)
+wodHashMapInsert(struct wodHashMap * hm,const void *key,const void *value)
 {
-	struct wcHashMapEntry * entry = malloc(sizeof(struct wcHashMapEntry));
+	struct wodHashMapEntry * entry = malloc(sizeof(struct wodHashMapEntry));
 	entry->kv.key =   hm->ktype.keyClone   ? hm->ktype.keyClone(hm->ktenv,key):key;
 	entry->kv.value = hm->ktype.valueClone ? hm->ktype.valueClone(hm->ktenv,value):value;
 	entry->tkey = first_hash_func(hm,key);
@@ -84,9 +84,9 @@ wcHashMapInsert(struct wcHashMap * hm,const void *key,const void *value)
 	return 0;
 }
 void *
-wcHashMapQuery(struct wcHashMap *hm,const void *key)
+wodHashMapQuery(struct wodHashMap *hm,const void *key)
 {
-	struct wcHashMapEntry * entry;
+	struct wodHashMapEntry * entry;
 	unsigned tkey =first_hash_func(hm,key);
 	int i=0;
 	for(;i<hm->tblen;i++){
@@ -101,9 +101,9 @@ wcHashMapQuery(struct wcHashMap *hm,const void *key)
 	return NULL;
 }
 void *
-wcHashMapRemove(struct wcHashMap *hm,const void *key)
+wodHashMapRemove(struct wodHashMap *hm,const void *key)
 {
-	struct wcHashMapEntry * entry;
+	struct wodHashMapEntry * entry;
 	unsigned tkey = first_hash_func(hm,key);
 	int i=0;
 	void *value = NULL;
@@ -120,15 +120,15 @@ wcHashMapRemove(struct wcHashMap *hm,const void *key)
 	return value;
 }
 unsigned
-hmtHashFunc(struct wcHashMapTable *hmt,unsigned key)
+hmtHashFunc(struct wodHashMapTable *hmt,unsigned key)
 {
 	return (key * 7)&(hmt->cap-1);
 }
 
-static struct wcHashMapTable *
+static struct wodHashMapTable *
 _hmtNew(unsigned key,unsigned sz)
 {
-	struct wcHashMapTable * hmt = malloc(sizeof(struct wcHashMapTable));
+	struct wodHashMapTable * hmt = malloc(sizeof(struct wodHashMapTable));
 	hmt->etys = malloc(sz*sizeof(void *));
 	memset(hmt->etys,0,sz*sizeof(void *));
 	hmt->used = 0;
@@ -137,10 +137,10 @@ _hmtNew(unsigned key,unsigned sz)
 	return hmt;
 }
 static void
-_hmtDelete(struct wcHashMap *hm,struct wcHashMapTable * hmt)
+_hmtDelete(struct wodHashMap *hm,struct wodHashMapTable * hmt)
 {
 	int i=0;
-	struct wcHashMapEntry *tmp,*cut;
+	struct wodHashMapEntry *tmp,*cut;
 	for(;i<hmt->cap;i++){
 		cut = hmt->etys[i];
 		while(cut){
@@ -155,9 +155,9 @@ _hmtDelete(struct wcHashMap *hm,struct wcHashMapTable * hmt)
 	free(hmt);
 }
 static int
-_hmtInsert(struct wcHashMap * hm,int index,unsigned key ,struct wcHashMapEntry * entry)
+_hmtInsert(struct wodHashMap * hm,int index,unsigned key ,struct wodHashMapEntry * entry)
 {
-	struct wcHashMapTable *hmt = hm->tbs[index];
+	struct wodHashMapTable *hmt = hm->tbs[index];
 	
 	int i = hmtHashFunc(hmt,key);
 	entry->next = hmt->etys[i];
@@ -173,11 +173,11 @@ _hmtInsert(struct wcHashMap * hm,int index,unsigned key ,struct wcHashMapEntry *
 	}
 	return 0;
 }
-static struct wcHashMapEntry *  
-_hmtQuery(struct wcHashMap * hm,int index,unsigned key)
+static struct wodHashMapEntry *
+_hmtQuery(struct wodHashMap * hm,int index,unsigned key)
 {
-	struct wcHashMapTable * hmt = hm->tbs[index];
-	struct wcHashMapEntry * cut;
+	struct wodHashMapTable * hmt = hm->tbs[index];
+	struct wodHashMapEntry * cut;
 	unsigned i = hmtHashFunc(hmt,key);
 	cut = hmt->etys[i];
 	while(cut){
@@ -188,11 +188,11 @@ _hmtQuery(struct wcHashMap * hm,int index,unsigned key)
 	}
 	return NULL;
 }
-static struct wcHashMapEntry *  
-_hmtRemove(struct wcHashMap * hm,int index,unsigned key)
+static struct wodHashMapEntry *
+_hmtRemove(struct wodHashMap * hm,int index,unsigned key)
 {
-	struct wcHashMapTable * hmt = hm->tbs[index];
-	struct wcHashMapEntry * cut,*pre;
+	struct wodHashMapTable * hmt = hm->tbs[index];
+	struct wodHashMapEntry * cut,*pre;
 	int i = hmtHashFunc(hmt,key);
 	cut = hmt->etys[i]; pre = NULL;
 	while(cut){
@@ -208,7 +208,7 @@ _hmtRemove(struct wcHashMap * hm,int index,unsigned key)
 	return NULL;
 }
 static void
-_hmtNeedDetach(struct wcHashMap  *hm,unsigned index)
+_hmtNeedDetach(struct wodHashMap  *hm,unsigned index)
 {
 	if(hm->tblen == hm->tbcap){
 		hm->tbcap*=2;
@@ -222,11 +222,11 @@ _hmtNeedDetach(struct wcHashMap  *hm,unsigned index)
 	_hmtDetach(hm,index,index+1);
 }
 static void
-_hmtDetach(struct wcHashMap *hm,int lindex,int rindex)
+_hmtDetach(struct wodHashMap *hm,int lindex,int rindex)
 {
-	struct wcHashMapTable * hmtLft = hm->tbs[lindex];
-	struct wcHashMapTable * hmtRht = hm->tbs[rindex];
-	struct wcHashMapEntry * cut,*pre,*tmp;
+	struct wodHashMapTable * hmtLft = hm->tbs[lindex];
+	struct wodHashMapTable * hmtRht = hm->tbs[rindex];
+	struct wodHashMapEntry * cut,*pre,*tmp;
 	int i;
 	for(i=0; i<hmtRht->cap;i++){
 		cut = hmtRht->etys[i]; pre = NULL;
@@ -246,10 +246,10 @@ _hmtDetach(struct wcHashMap *hm,int lindex,int rindex)
 }
 
 static void  
-_hmtReHash(struct wcHashMap * hm,int index)
+_hmtReHash(struct wodHashMap * hm,int index)
 {
-	struct wcHashMapEntry * cut,*tmp;
-	struct wcHashMapTable * hmt = hm->tbs[index];
+	struct wodHashMapEntry * cut,*tmp;
+	struct wodHashMapTable * hmt = hm->tbs[index];
 	hm->tbs[index] = _hmtNew(hmt->hashkey,hmt->cap*2);
 	int i;
 	for(i=0; i<hmt->cap;i++){

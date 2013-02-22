@@ -8,10 +8,10 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <assert.h>
-static int _resize_byuse(struct wcCycleBuf* cycle,int usesz);
-static int 	_get_free_sz(struct wcCycleBuf* cycle);
+static int _resize_byuse(struct wodCycleBuf* cycle,int usesz);
+static int 	_get_free_sz(struct wodCycleBuf* cycle);
 int
-wcCycleBufInit( struct wcCycleBuf* cycle,int defsize)
+wodCycleBufInit( struct wodCycleBuf* cycle,int defsize)
 {
 	if(!cycle || defsize <= 0){
 		return -1;
@@ -23,7 +23,7 @@ wcCycleBufInit( struct wcCycleBuf* cycle,int defsize)
 	return 0;
 }
 int
-wcCycleBufPush(struct wcCycleBuf* cycle,void *buf,int bufsz)
+wodCycleBufPush(struct wodCycleBuf* cycle,void *buf,int bufsz)
 {
 	if(!buf || bufsz<=0){
 		return -1;
@@ -49,7 +49,7 @@ wcCycleBufPush(struct wcCycleBuf* cycle,void *buf,int bufsz)
 }
 
 void
-wcCycleBufPop(struct wcCycleBuf* cycle,int sz)
+wodCycleBufPop(struct wodCycleBuf* cycle,int sz)
 {
 	int usedsz = cycle->cap - _get_free_sz(cycle);
 	if(usedsz > sz){
@@ -59,7 +59,7 @@ wcCycleBufPop(struct wcCycleBuf* cycle,int sz)
 	}
 }
 int
-wcCycleBufUsed(struct wcCycleBuf* cycle,struct wcCyclePair * pair)
+wodCycleBufUsed(struct wodCycleBuf* cycle,struct wodCyclePair * pair)
 {
 	if(cycle->head == cycle->tail){
 		return -1;
@@ -80,7 +80,7 @@ wcCycleBufUsed(struct wcCycleBuf* cycle,struct wcCyclePair * pair)
 	return 0;
 }
 int
-wcCycleBufGrow(struct wcCycleBuf* cycle,int freesize,struct wcCyclePair *pair)
+wodCycleBufGrow(struct wodCycleBuf* cycle,int freesize,struct wodCyclePair *pair)
 {
 	if( freesize<0){
 		return -1;
@@ -119,7 +119,7 @@ wcCycleBufGrow(struct wcCycleBuf* cycle,int freesize,struct wcCyclePair *pair)
 	return 0;
 }
 void
-wcCycleBufBack(struct wcCycleBuf* cycle,int backsz)
+wodCycleBufBack(struct wodCycleBuf* cycle,int backsz)
 {
 	int usedsz = cycle->cap - _get_free_sz(cycle);
 	if(usedsz > backsz){
@@ -129,12 +129,12 @@ wcCycleBufBack(struct wcCycleBuf* cycle,int backsz)
 	}
 }
 void
-wcCycleBufDestroy( struct wcCycleBuf* cycle )
+wodCycleBufDestroy( struct wodCycleBuf* cycle )
 {
 	free(cycle->buf);
 }
 static int
-_get_free_sz(struct wcCycleBuf* cycle)
+_get_free_sz(struct wodCycleBuf* cycle)
 {//可用的SIZE
 	int freesize = 0;
 	if(cycle->head > cycle->tail){
@@ -147,33 +147,33 @@ _get_free_sz(struct wcCycleBuf* cycle)
 	return freesize;
 }
 bool
-wcCycleBufEmpty( struct wcCycleBuf* cycle )
+wodCycleBufEmpty( struct wodCycleBuf* cycle )
 {
 	return (cycle->head == cycle->tail);
 }
 static int
-_resize_byuse(struct wcCycleBuf* cycle,int usesz)
+_resize_byuse(struct wodCycleBuf* cycle,int usesz)
 {
 	int freesize = _get_free_sz(cycle);
-	int newcaps = cycle->cap;
+	int newodaps = cycle->cap;
 	int tmp = freesize;
 	while(tmp <= usesz){
-		tmp += newcaps;
-		newcaps*=2;
+		tmp += newodaps;
+		newodaps*=2;
 	}
 	if(tmp > freesize){
 		void * newbuf;
 		if(cycle->head == cycle->tail){
-			newbuf = realloc(cycle->buf,newcaps);
+			newbuf = realloc(cycle->buf,newodaps);
 			if(!newbuf){
 				return -1;
 			}
 			cycle->buf = newbuf;
 			cycle->head = 0;
 			cycle->tail = 0;
-			cycle->cap = newcaps;
+			cycle->cap = newodaps;
 		}else{
-			newbuf = malloc(newcaps);
+			newbuf = malloc(newodaps);
 			if(!newbuf){
 				return -1;
 			}
@@ -184,14 +184,14 @@ _resize_byuse(struct wcCycleBuf* cycle,int usesz)
 				memcpy(newbuf,cycle->buf,esz);
 				cycle->head = 0;
 				cycle->tail = fsz+esz;
-				cycle->cap = newcaps;
+				cycle->cap = newodaps;
 			}else{
 				int sz = cycle->tail-cycle->head;
 				memcpy(newbuf,cycle->buf+cycle->head,sz);
 
 				cycle->head = 0;
 				cycle->tail = sz;
-				cycle->cap = newcaps;
+				cycle->cap = newodaps;
 			}
 			free(cycle->buf);
 			cycle->buf = newbuf;

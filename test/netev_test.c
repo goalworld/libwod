@@ -4,57 +4,57 @@
 #include <stdio.h>
 #include <errno.h>
 #define BUF_SZ 1024
-static void _doAccept(struct wvLoop *loop,void * nv,int mask);
-static void _doRead(struct wvLoop *loop,void * nv,int mask);
+static void _doAccept(struct wodEvLoop *loop,void * nv,int mask);
+static void _doRead(struct wodEvLoop *loop,void * nv,int mask);
 
 int 
 main(int argc, char const *argv[])
 {
-	struct wvLoop *loop;
-	loop = wvLoopNew(10240,WV_POLL_POLL);
+	struct wodEvLoop *loop;
+	loop = wodEvLoopNew(10240,WV_POLL_POLL);
 	if( !loop ){
 		printf("%s\n", "loop create error" );
 		return 1;
 	}
-	wnFd fd = wnTcpListen(TCP4,"0.0.0.0",8100);
+	wodNetFd fd = wodNetTcpListen(TCP4,"0.0.0.0",8100);
 	if(fd < 0){
 		printf("%s\n", strerror(-fd) );
 		return 1;
 	}
 	printf("%d\n",fd);
-	wnSetNonBlock(fd,1);
-	wvIOAdd(loop,fd,WV_IO_READ,_doAccept,(void *)(fd));
-	wvRun(loop);
+	wodNetSetNonBlock(fd,1);
+	wodEvIOAdd(loop,fd,WV_IO_READ,_doAccept,(void *)(intptr_t)(fd));
+	wodEvRun(loop);
 	return 0;
 }
 static void 
-_doAccept(struct wvLoop *loop,void * nv,int mask)
+_doAccept(struct wodEvLoop *loop,void * nv,int mask)
 {
-	wnFd fd = (wnFd)(long)(nv);
-	wnFd cfd = wnAccept(fd);
+	wodNetFd fd = (wodNetFd)(long)(nv);
+	wodNetFd cfd = wodNetAccept(fd);
 	
 	if(cfd > 0){
 		printf("Connected : fd%d\n",cfd );
-		wnSetNonBlock(cfd,1);
-		wvIOAdd(loop,cfd,WV_IO_READ,_doRead,(void *)(cfd));
+		wodNetSetNonBlock(cfd,1);
+		wodEvIOAdd(loop,cfd,WV_IO_READ,_doRead,(void *)(intptr_t)(cfd));
 		
 	}else if(cfd < 0 && -cfd == EAGAIN){
 		if(-cfd == EAGAIN){
-			perror("wnAccept00000000000");
+			perror("wodNetAccept00000000000");
 		}else{
-			perror("wnAccept");
+			perror("wodNetAccept");
 		}
 	}
 }
 static void 
-_doRead(struct wvLoop *loop,void * nv,int mask)
+_doRead(struct wodEvLoop *loop,void * nv,int mask)
 {
-	wnFd fd = (wnFd)(long)(nv);
+	wodNetFd fd = (wodNetFd)(long)(nv);
 	unsigned char buf[BUF_SZ+1];
-	int nr = wnRead(fd,buf,BUF_SZ);
+	int nr = wodNetRead(fd,buf,BUF_SZ);
 	if( nr <= 0){
 		perror("read");
-		wvIORemove(loop,fd,WV_IO_READ);
+		wodEvIORemove(loop,fd,WV_IO_READ);
 		return;
 	}
 	buf[nr] = 0;

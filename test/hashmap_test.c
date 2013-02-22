@@ -39,24 +39,24 @@ int main(int argc, char const *argv[])
 static void 
 test(unsigned  num )
 {
-	struct wcHashMapType whmt;
+	struct wodHashMapType whmt;
 	memset(&whmt,0,sizeof(whmt));
 	whmt.hashFunc = hashFunc;
-	struct wcHashMap *hm = wcHashMapNew(whmt,NULL);
+	struct wodHashMap *hm = wodHashMapNew(whmt,NULL);
 	int i=0;
 	double pre = rainGetTime(),df;
 	for(;i<num;i++){
-		wcHashMapInsert(hm,(void *)i,(void *)i);
+		wodHashMapInsert(hm,(void *)i,(void *)i);
 	}
 	printf("[BEGIN]number : %d\n",num);
 	df = rainGetTime()-pre;
 	printf("[Insert]%d >>> all:%f---one:%f\n",num,df,df/num);
 	pre = rainGetTime();
 	for( i=0;i<num;i++){
-		wcHashMapQuery(hm,(void *)i);
+		wodHashMapQuery(hm,(void *)i);
 	}
 	df = rainGetTime()-pre;
 	printf("[Query] %d>>> all:%f---one:%f\n",num,df,df/num);
 	puts("[END]");
-	wcHashMapDelete(hm);
+	wodHashMapDelete(hm);
 }

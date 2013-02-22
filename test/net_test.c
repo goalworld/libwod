@@ -9,28 +9,28 @@ int main()
 {
 	unsigned char rdbuf[BUF_SZ+1];
 	rdbuf[BUF_SZ]=0;
-	wnFd fd = wnTcpListen(TCP4,"0.0.0.0",8199);
+	wodNetFd fd = wodNetTcpListen(TCP4,"0.0.0.0",8199);
 	if(fd < 0){
 		printf("%s\n", strerror(-fd));
 		exit(1);
 	}
 	printf("%d\n",8199);
 	for(;;){
-		wnFd cfd = wnAccept(fd);
+		wodNetFd cfd = wodNetAccept(fd);
 		if(cfd < 0){
 			printf("%s\n", strerror(-cfd));
 			exit(1);
 		}else{
-			int nr = wnRead(cfd,rdbuf,BUF_SZ);
+			int nr = wodNetRead(cfd,rdbuf,BUF_SZ);
 			if(cfd < 0){
 				printf("%s\n", strerror(-cfd));
-				wnClose(cfd);
+				wodNetClose(cfd);
 				continue;
 			}
 			rdbuf[nr] = 0;
 			printf("%s\n", rdbuf);
-			wnWrite(cfd,rdbuf,nr);
-			wnClose(cfd);
+			wodNetWrite(cfd,rdbuf,nr);
+			wodNetClose(cfd);
 		}
 	}
 }
