@@ -16,15 +16,15 @@ struct wodEvPoller{
 	void (*Del)(struct wodEvLoop *loop);
 	int (*Add)(struct wodEvLoop *loop,int fd,int mask);
 	int	(*Remove)(struct wodEvLoop *loop , int fd,int mask);
-	int (*Poll)(struct wodEvLoop *loop,double timeOut);
+	int (*Poll)(struct wodEvLoop *loop,long long timeOut);
 };
 struct wodEvTime{
 	int id;
 	wodEvTimeFn timeProc;
 	void * timeArg;
-	double sec;
-	double passSec;
-	double cutClock;
+	long long sec;
+	long long passSec;
+	long long cutClock;
 	int dispose;
 	int repetTims;
 	struct wodEvTime *next;
@@ -56,7 +56,8 @@ struct wodEvLoop{
 	struct wodEvUserDef * userdefHead;
 	struct wodEvTime* hashMap[HASH_SIZE];
 	int used;
-	double minSec;
+	long long minSec;
+	long long preSec;
 };
 #define SET_POLLER(poller,type) \
 				pllor->Add = type##Add;\

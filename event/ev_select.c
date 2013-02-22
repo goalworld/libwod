@@ -64,7 +64,7 @@ selectRemove(struct wodEvLoop *loop , int fd,int mask)
 	return WV_ROK;
 }
 static int
-selectPoll(struct wodEvLoop *loop,double timeOut)
+selectPoll(struct wodEvLoop *loop,long long timeOut)
 {
 	selectData * p = (selectData *)loop->pollorData;
 	fd_set rset,wset;
@@ -72,8 +72,8 @@ selectPoll(struct wodEvLoop *loop,double timeOut)
 	wset = p->wset;
 	int max = p->maxfd + 1,i=0,numele=0;
 	struct timeval tv;
-	tv.tv_sec = timeOut;
-	tv.tv_usec = (timeOut - tv.tv_sec) * 1E6;
+	tv.tv_sec = timeOut/1000000;
+	tv.tv_usec = (timeOut - tv.tv_sec);
 	int ret = select(max,&rset,&wset,NULL,&tv);
 	switch (ret){
 	case 0:return 0;

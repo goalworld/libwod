@@ -102,7 +102,7 @@ pollRemove(struct wodEvLoop *loop , int fd,int mask)
 	return -EINVAL;
 }
 static  int 
-pollPoll(struct wodEvLoop *loop,double timeOut)
+pollPoll(struct wodEvLoop *loop,long long timeOut)
 {
 	struct pollData * p = (struct pollData *)loop->pollorData;
 	
@@ -110,7 +110,7 @@ pollPoll(struct wodEvLoop *loop,double timeOut)
 	struct wodEvIO * pio;
 	struct pollfd * cut;
 	int i = 0;
-	int ret = poll(p->pfdArr,p->len, timeOut*1E3);
+	int ret = poll(p->pfdArr,p->len, timeOut/1000);
 	if(ret > 0){
 		for(;i<p->len;i++){
 			cut = p->pfdArr+i;

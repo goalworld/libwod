@@ -72,12 +72,12 @@ epollRemove(struct wodEvLoop *loop ,int fd, int mask)
 }
 
 static int 
-epollPoll(struct wodEvLoop *loop,double timeOut)
+epollPoll(struct wodEvLoop *loop,long long timeOut)
 {
 	struct epoll_info * pInfo = (struct epoll_info *)(loop->pollorData);
 	int ret;
 	struct epoll_event epEvs[loop->set_size];
-	while( ( ret = epoll_wait(pInfo->epFd,epEvs,loop->set_size,timeOut*1E3) ) && ret < 0 && errno == EINTR);
+	while( ( ret = epoll_wait(pInfo->epFd,epEvs,loop->set_size,timeOut/1000) ) && ret < 0 && errno == EINTR);
 	if(ret > 0){
 		int tmp = ret;
 		struct epoll_event * epEv = epEvs ;
