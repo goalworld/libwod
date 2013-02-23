@@ -7,7 +7,7 @@
 
 #ifndef WODEV_INNER_H_
 #define WODEV_INNER_H_
-#include "../include/wod_ev.h"
+#include "../include/wod_event.h"
 #define HASH_SIZE 32
 #define SLEEP 1E1//1ms
 struct wod_event_loop;
