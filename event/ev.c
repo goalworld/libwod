@@ -1,10 +1,9 @@
 /*
- * wodEv.c
+ * ev.c
  *
  *  Created on: 2012-10-23
  *      Author: goalworld
  */
-#include "wod_ev.h"
 #include "evinner.h"
 #include <sys/time.h>
 #include <string.h>
@@ -264,7 +263,7 @@ void wod_event_userdef_remove(struct wod_event_loop *loop,int id){
 		tmp = tmp->next;
 	}
 }
-#define HAS_EPOLL 1
+//#define HAS_EPOLL 1
 #define HAS_SELECT 1
 #define HAS_POLL 1
 #if HAS_EPOLL
