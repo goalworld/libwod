@@ -74,14 +74,14 @@ wodEvLoopDelete(struct wod_event_main *loop)
 	free(loop);
 }
 static void
-_processIO(struct wod_event_main *loop,long long runSec)
+_processIO(struct wod_event_main *loop)
 {
-	long long tmpSec = loop->minSec - runSec;
-	if(tmpSec < 0 ){
-		tmpSec = 0;
+	long long tmpsec = loop->minSec;
+	if(loop->minSec > 1000){
+		tmpsec -= 1000;
 	}
 	if(loop->used){
-		int ret = loop->pollor.poll(loop,tmpSec);
+		int ret = loop->pollor.poll(loop,tmpsec);
 		struct wod_event_io * fev;
 		for(;ret>0;ret--){
 			fev = &loop->files[loop->pendFds[ret-1]];
@@ -93,8 +93,7 @@ _processIO(struct wod_event_main *loop,long long runSec)
 			}
 		}
 	}else{
-		int usec = tmpSec*1E6 - 100;
-		wod_event_sleep(usec);
+		wod_event_sleep(tmpsec);
 	}
 }
 static void _processIdle(struct wod_event_main *loop){
@@ -153,22 +152,14 @@ static void _processTime(struct wod_event_main *loop){
 }
 void wod_event_main_once(struct wod_event_main *loop){
 	_processTime(loop);
-	_processIO(loop,0);
 	_processIdle(loop);
+	_processIO(loop);
 }
 void wod_event_main_loop(struct wod_event_main *loop){
-	long long  space = 0.0,cut;
 	while(!loop->isQuit){
-		cut = wod_event_time();
-		if(loop->preSec == 0){
-			space = 0;
-		}else{
-			space = cut-loop->preSec;
-		}
-		loop->preSec = wod_event_time();
 		_processTime(loop);
-		_processIO(loop,space);
 		_processIdle(loop);
+		_processIO(loop);
 	}
 }
 void wod_event_main_stop(struct wod_event_main *loop){

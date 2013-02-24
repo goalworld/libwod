@@ -9,7 +9,7 @@
 #define WODEV_INNER_H_
 #include "../include/wod_event.h"
 #define HASH_SIZE 32
-#define SLEEP 1E1//1ms
+#define SLEEP 10000000
 struct wod_event_main;
 struct wod_event_pollor{
 	int (*new)(struct wod_event_main * loop,int flag);

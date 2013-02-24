@@ -6,7 +6,7 @@
 #define BUF_SZ 1024
 static void _doAccept(struct wod_event_main *loop,void * nv,int mask);
 static void _doRead(struct wod_event_main *loop,void * nv,int mask);
-
+static int _doTimer(struct wod_event_main * loop,void * nv);
 int 
 main(int argc, char const *argv[])
 {
@@ -24,20 +24,30 @@ main(int argc, char const *argv[])
 	printf("%d\n",fd);
 	wod_net_noblock(fd,1);
 	wod_event_io_add(loop,fd,WV_IO_READ,_doAccept,(void *)(intptr_t)(fd));
+	int id = wod_event_time_add(loop,10000,_doTimer,NULL);
 	wod_event_main_loop(loop);
 	return 0;
 }
-static void 
+static int
+_doTimer(struct wod_event_main * loop,void * nv)
+{
+	static long long pre = 0;
+	long long cut = wod_event_time();
+	printf("hello  %ld\n",cut-pre);
+	pre = cut;
+	return WV_ROK;
+}
+static void
 _doAccept(struct wod_event_main *loop,void * nv,int mask)
 {
 	wod_socket_t fd = (wod_socket_t)(long)(nv);
 	wod_socket_t cfd = wod_net_accept(fd);
-	
+
 	if(cfd > 0){
 		printf("Connected : fd%d\n",cfd );
 		wod_net_noblock(cfd,1);
 		wod_event_io_add(loop,cfd,WV_IO_READ,_doRead,(void *)(intptr_t)(cfd));
-		
+
 	}else if(cfd < 0 && -cfd == EAGAIN){
 		if(-cfd == EAGAIN){
 			perror("wodNetAccept00000000000");
@@ -55,6 +65,7 @@ _doRead(struct wod_event_main *loop,void * nv,int mask)
 	if( nr <= 0){
 		perror("read");
 		wod_event_io_remove(loop,fd,WV_IO_READ);
+		wod_net_close(fd);
 		return;
 	}
 	buf[nr] = 0;
