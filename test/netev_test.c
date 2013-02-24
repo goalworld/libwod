@@ -32,7 +32,7 @@ static int
 _doTimer(struct wod_event_main * loop,void * nv)
 {
 	static long long pre = 0;
-	long long cut = wod_event_time();
+	long long cut = wod_time_usecond();
 	printf("hello  %ld\n",cut-pre);
 	pre = cut;
 	return WV_ROK;
