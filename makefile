@@ -13,11 +13,12 @@ clean:
 
 
 SRCS=./container/array.c \
-				./container/cyclebuffer.c \
-				./container/hashmap.c \
-				./container/queue.c \
-				./event/ev.c \
-				./net/net_unix.c
+				./container/wod_cyclebuffer.c \
+				./container/wod_hashmap.c \
+				./container/wod_queue.c \
+				./event/wod_event.c \
+				./net/net_unix.c\
+				./time/wod_time.c
 $(BUILD)libwod.so : $(SRCS)
 			$(CC) $(CFLAGS) $(INC_DIR) $(SHARED) -o $@ $^ 
 			
