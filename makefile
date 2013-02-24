@@ -12,12 +12,12 @@ clean:
 	rm $(BUILD)*
 
 
-SRCS=./container/array.c \
+SRCS=./container/wod_array.c \
 				./container/wod_cyclebuffer.c \
 				./container/wod_hashmap.c \
 				./container/wod_queue.c \
 				./event/wod_event.c \
-				./net/net_unix.c\
+				./net/wod_net_unix.c\
 				./time/wod_time.c
 $(BUILD)libwod.so : $(SRCS)
 			$(CC) $(CFLAGS) $(INC_DIR) $(SHARED) -o $@ $^ 

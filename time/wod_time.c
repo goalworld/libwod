@@ -1,5 +1,6 @@
 #include "wod_time.h"
-
+#include <unistd.h>
+#include <sys/time.h>
 long long
 wod_time_usecond()
 {

@@ -9,7 +9,7 @@
 #include "wod_time.h"
 #include <string.h>
 #include <stdlib.h>
-#include <unistd.h>
+
 #include <errno.h>
 
 static int _init_pollor(struct wod_event_pollor* pllor,int type);
