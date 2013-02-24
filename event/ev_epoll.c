@@ -14,7 +14,7 @@ struct epoll_info{
 };
 
 static int 
-epoll_new(struct wod_event_loop * loop,int flag)
+epoll_new(struct wod_event_main * loop,int flag)
 {
 	struct epoll_info * pInfo = malloc(sizeof(struct epoll_info));
 	if((pInfo->epFd = epoll_create1(EPOLL_CLOEXEC)) < 0){
@@ -25,14 +25,14 @@ epoll_new(struct wod_event_loop * loop,int flag)
 	return WV_ROK;
 }
 static void 
-epoll_delete(struct wod_event_loop *loop)
+epoll_delete(struct wod_event_main *loop)
 {
 	struct epoll_info * pInfo = (struct epoll_info *)(loop->pollorData);
 	close( pInfo->epFd );
 	free(loop->pollorData);
 }
 static int 
-epoll_add(struct wod_event_loop *loop, int fd, int mask)
+epoll_add(struct wod_event_main *loop, int fd, int mask)
 {
 	struct epoll_info * pInfo = (struct epoll_info *)(loop->pollorData);
 	struct epoll_event epEv;
@@ -56,7 +56,7 @@ epoll_add(struct wod_event_loop *loop, int fd, int mask)
 }
 
 static int 
-epoll_remove(struct wod_event_loop *loop ,int fd, int mask)
+epoll_remove(struct wod_event_main *loop ,int fd, int mask)
 {
 	struct epoll_info * pInfo = (struct epoll_info *)(loop->pollorData);
 	struct epoll_event epEv;
@@ -72,7 +72,7 @@ epoll_remove(struct wod_event_loop *loop ,int fd, int mask)
 }
 
 static int 
-epoll_poll(struct wod_event_loop *loop,long long timeOut)
+epoll_poll(struct wod_event_main *loop,long long timeOut)
 {
 	struct epoll_info * pInfo = (struct epoll_info *)(loop->pollorData);
 	int ret;

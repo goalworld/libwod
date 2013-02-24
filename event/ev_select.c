@@ -15,7 +15,7 @@ typedef struct selectData{
 	fd_set wset;
 }selectData;
 static int
-select_new(struct wod_event_loop * loop,int flag)
+select_new(struct wod_event_main * loop,int flag)
 {
 	selectData * p = malloc(sizeof(selectData));
 	assert(p);
@@ -26,13 +26,13 @@ select_new(struct wod_event_loop * loop,int flag)
 	return WV_ROK;
 }
 static void
-select_delete(struct wod_event_loop *loop)
+select_delete(struct wod_event_main *loop)
 {
 	free(loop->pollorData);
 	return ;
 }
 static int
-select_add(struct wod_event_loop *loop,int fd,int mask)
+select_add(struct wod_event_main *loop,int fd,int mask)
 {
 	selectData * p = (selectData *)loop->pollorData;
 	if(fd > p->maxfd){
@@ -46,7 +46,7 @@ select_add(struct wod_event_loop *loop,int fd,int mask)
 	return WV_ROK;
 }
 static int
-select_remove(struct wod_event_loop *loop , int fd,int mask)
+select_remove(struct wod_event_main *loop , int fd,int mask)
 {
 	selectData * p = (selectData *)loop->pollorData;
 	mask =(loop->files[fd].event & (~mask));
@@ -64,7 +64,7 @@ select_remove(struct wod_event_loop *loop , int fd,int mask)
 	return WV_ROK;
 }
 static int
-select_poll(struct wod_event_loop *loop,long long timeOut)
+select_poll(struct wod_event_main *loop,long long timeOut)
 {
 	selectData * p = (selectData *)loop->pollorData;
 	fd_set rset,wset;

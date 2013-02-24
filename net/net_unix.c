@@ -28,7 +28,7 @@ const char * inet_ntop(
 */
 #define SA struct sockaddr 
 static int 
-_getAddr(enum wodNetTCP et,const char *ip,short port,SA **outaddr,size_t *len,int *fam)
+_get_addr(enum wodNetTCP et,const char *ip,short port,SA **outaddr,size_t *len,int *fam)
 {
 	int family;
 	if(et == TCP4){
@@ -63,13 +63,13 @@ _getAddr(enum wodNetTCP et,const char *ip,short port,SA **outaddr,size_t *len,in
 	return 0;
 }
 wod_socket_t
-wod_tcp_listen(enum wodNetTCP et,const char * ip,int port)
+wod_net_tcp_listen(enum wodNetTCP et,const char * ip,int port)
 {
 	SA *addr;
 	size_t len;
 	int family;
 	int ret;
-	if( (ret = _getAddr(et,ip,port,&addr,&len,&family)) < 0){
+	if( (ret = _get_addr(et,ip,port,&addr,&len,&family)) < 0){
 		return ret;
 	}
 	wod_socket_t sfd = socket(family,SOCK_STREAM,0);
@@ -87,13 +87,13 @@ wod_tcp_listen(enum wodNetTCP et,const char * ip,int port)
 	return sfd;
 }
 wod_socket_t
-wod_tcp_connect(enum wodNetTCP et,const char * ip,int port)
+wod_net_tcp_connect(enum wodNetTCP et,const char * ip,int port)
 {
 	SA *addr;
 	size_t len;
 	int family;
 	int ret;
-	if( (ret = _getAddr(et,ip,port,&addr,&len,&family)) < 0){
+	if( (ret = _get_addr(et,ip,port,&addr,&len,&family)) < 0){
 		return ret;
 	}
 	wod_socket_t sfd = socket(family,SOCK_STREAM,0);
@@ -108,7 +108,7 @@ wod_tcp_connect(enum wodNetTCP et,const char * ip,int port)
 	return sfd;
 }
 wod_socket_t
-wod_accept( wod_socket_t sfd)
+wod_net_accept( wod_socket_t sfd)
 {
 	int ret;
 	for(;;){
@@ -134,7 +134,7 @@ wod_locate_addr(wod_socket_t fd,char * strptr,size_t len,int *port)
 	return 0;
 }
 int  
-wod_writev(wod_socket_t fd,struct wod_socket_buf *bufs,size_t bufslen)
+wod_net_writev(wod_socket_t fd,struct wod_socket_buf *bufs,size_t bufslen)
 {
 	int nw;
 	for(;;){
@@ -147,7 +147,7 @@ wod_writev(wod_socket_t fd,struct wod_socket_buf *bufs,size_t bufslen)
 	return nw;
 }
 int  
-wod_write(wod_socket_t fd,void *buf,size_t sz)
+wod_net_write(wod_socket_t fd,void *buf,size_t sz)
 {
 	int nw;
 	for(;;){
@@ -160,7 +160,7 @@ wod_write(wod_socket_t fd,void *buf,size_t sz)
 	return nw;
 }
 int  
-wod_readv(wod_socket_t fd,struct wod_socket_buf *bufs,size_t bufslen)
+wod_net_readv(wod_socket_t fd,struct wod_socket_buf *bufs,size_t bufslen)
 {
 	int nr;
 	for(;;){
@@ -173,12 +173,12 @@ wod_readv(wod_socket_t fd,struct wod_socket_buf *bufs,size_t bufslen)
 	return nr;
 }
 int  
-wod_read_full(wod_socket_t fd,void *buf,size_t sz)
+wod_net_read_full(wod_socket_t fd,void *buf,size_t sz)
 {
 	return 0;
 }
 int  
-wod_read(wod_socket_t fd,void *buf,size_t sz)
+wod_net_read(wod_socket_t fd,void *buf,size_t sz)
 {
 	int nr;
 	for(;;){
@@ -192,7 +192,7 @@ wod_read(wod_socket_t fd,void *buf,size_t sz)
 }
 
 int  
-wod_close(wod_socket_t fd)
+wod_net_close(wod_socket_t fd)
 {
 	int ret = close(fd);
 	if(ret < 0){
@@ -201,7 +201,7 @@ wod_close(wod_socket_t fd)
 	return ret;
 }
 int  
-wod_set_noblock(wod_socket_t fd,int flag)
+wod_net_noblock(wod_socket_t fd,int flag)
 {
 	int oflag = fcntl(fd, F_GETFL, 0);
 	if(flag){
@@ -216,22 +216,22 @@ wod_set_noblock(wod_socket_t fd,int flag)
     return 0;
 }
 int  
-wod_set_keep_alive(wod_socket_t fd,int flag)
+wod_net_keep_alive(wod_socket_t fd,int flag)
 {
 	return setsockopt(fd,SOL_SOCKET,SO_KEEPALIVE,&flag,sizeof(flag));
 }
 int  
-wod_set_nodelay(wod_socket_t fd,int flag)
+wod_net_nodelay(wod_socket_t fd,int flag)
 {
 	return setsockopt(fd,IPPROTO_TCP,TCP_NODELAY,&flag,sizeof(flag));
 }
 int  
-wod_set_recv_buffer_size(wod_socket_t fd,int flag)
+wod_net_recv_buffer_size(wod_socket_t fd,int flag)
 {
 	return setsockopt(fd,SOL_SOCKET,SO_RCVBUF,&flag,sizeof(flag));
 }
 int  
-wod_set_send_buffer_size(wod_socket_t fd,int flag)
+wod_net_send_buffer_size(wod_socket_t fd,int flag)
 {
 	return setsockopt(fd,SOL_SOCKET,SO_SNDBUF,&flag,sizeof(flag));
 } 	

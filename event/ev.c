@@ -4,6 +4,7 @@
  *  Created on: 2012-10-23
  *      Author: goalworld
  */
+#include "wod_config.h"
 #include "evinner.h"
 #include <sys/time.h>
 #include <string.h>
@@ -35,10 +36,10 @@ _hashFunction(int id)
 {
 	return id%HASH_SIZE;
 }
-struct wod_event_loop *
-wod_event_loop_new(int set_size,int type)
+struct wod_event_main *
+wod_event_main_new(int set_size,int type)
 {
-	struct wod_event_loop * loop = malloc(sizeof(struct wod_event_loop));
+	struct wod_event_main * loop = malloc(sizeof(struct wod_event_main));
 	int ret = _init_pollor(&loop->pollor,type);
 	if(ret != WV_ROK){
 		free(loop);
@@ -67,13 +68,13 @@ wod_event_loop_new(int set_size,int type)
 	return loop;
 }
 void
-wodEvLoopDelete(struct wod_event_loop *loop)
+wodEvLoopDelete(struct wod_event_main *loop)
 {
 	loop->pollor.delete(loop);
 	free(loop);
 }
 static void
-_processIO(struct wod_event_loop *loop,long long runSec)
+_processIO(struct wod_event_main *loop,long long runSec)
 {
 	long long tmpSec = loop->minSec - runSec;
 	if(tmpSec < 0 ){
@@ -96,7 +97,7 @@ _processIO(struct wod_event_loop *loop,long long runSec)
 		wod_event_sleep(usec);
 	}
 }
-static void _processIdle(struct wod_event_loop *loop){
+static void _processIdle(struct wod_event_main *loop){
 	struct wod_event_userdef*tmp=loop->userdefHead,*pre = NULL,*next;
 	while(tmp){
 		next = tmp->next;
@@ -114,7 +115,7 @@ static void _processIdle(struct wod_event_loop *loop){
 		tmp = next;
 	}
 }
-static void _processTime(struct wod_event_loop *loop){
+static void _processTime(struct wod_event_main *loop){
 	int i =0;
 	loop->minSec = SLEEP;
 	for(i=0;i<HASH_SIZE;i++){
@@ -150,12 +151,12 @@ static void _processTime(struct wod_event_loop *loop){
 		}
 	}
 }
-void wod_event_loop_once(struct wod_event_loop *loop){
+void wod_event_main_once(struct wod_event_main *loop){
 	_processTime(loop);
 	_processIO(loop,0);
 	_processIdle(loop);
 }
-void wod_event_loop_loop(struct wod_event_loop *loop){
+void wod_event_main_loop(struct wod_event_main *loop){
 	long long  space = 0.0,cut;
 	while(!loop->isQuit){
 		cut = wod_event_time();
@@ -170,11 +171,11 @@ void wod_event_loop_loop(struct wod_event_loop *loop){
 		_processIdle(loop);
 	}
 }
-void wod_event_loop_stop(struct wod_event_loop *loop){
+void wod_event_main_stop(struct wod_event_main *loop){
 	loop->isQuit = 1;
 }
 
-int wod_event_io_add(struct wod_event_loop *loop,int fd,int event,wod_event_io_fn cb,void *cbArg){
+int wod_event_io_add(struct wod_event_main *loop,int fd,int event,wod_event_io_fn cb,void *cbArg){
 	if(fd > loop->set_size || fd <= 0 || !cb){
 		return -EINVAL;
 	}
@@ -199,7 +200,7 @@ int wod_event_io_add(struct wod_event_loop *loop,int fd,int event,wod_event_io_f
 
 	return fd;
 }
-void wod_event_io_remove(struct wod_event_loop *loop,int id,int event){
+void wod_event_io_remove(struct wod_event_main *loop,int id,int event){
 	if(id > loop->set_size){
 		return ;
 	}
@@ -213,7 +214,7 @@ void wod_event_io_remove(struct wod_event_loop *loop,int id,int event){
 	}
 }
 
-int wod_event_time_add(struct wod_event_loop *loop,long long usec,wod_event_time_fn cb,void *cbArg){
+int wod_event_time_add(struct wod_event_main *loop,long long usec,wod_event_time_fn cb,void *cbArg){
 	if(!cb){
 		return -EINVAL;
 	}
@@ -230,7 +231,7 @@ int wod_event_time_add(struct wod_event_loop *loop,long long usec,wod_event_time
 	loop->hashMap[hash] = pTime;
 	return pTime->id;
 }
-void wod_event_time_remove(struct wod_event_loop * loop,int id){
+void wod_event_time_remove(struct wod_event_main * loop,int id){
 	int hash = _hashFunction(id);
 	struct wod_event_time*tmp=loop->hashMap[hash];
 	while(tmp){
@@ -241,7 +242,7 @@ void wod_event_time_remove(struct wod_event_loop * loop,int id){
 	}
 }
 
-int wod_event_userdef_add(struct wod_event_loop *loop,wod_event_userdef_fn cb,void *cbArg){
+int wod_event_userdef_add(struct wod_event_main *loop,wod_event_userdef_fn cb,void *cbArg){
 	if(!cb){
 		return -EINVAL;
 	}
@@ -254,7 +255,7 @@ int wod_event_userdef_add(struct wod_event_loop *loop,wod_event_userdef_fn cb,vo
 	pIdle->dispose = 0;
 	return pIdle->id;
 }
-void wod_event_userdef_remove(struct wod_event_loop *loop,int id){
+void wod_event_userdef_remove(struct wod_event_main *loop,int id){
 	struct wod_event_userdef*tmp=loop->userdefHead;
 	while(tmp){
 		if(tmp->id == id){
@@ -263,9 +264,7 @@ void wod_event_userdef_remove(struct wod_event_loop *loop,int id){
 		tmp = tmp->next;
 	}
 }
-//#define HAS_EPOLL 1
-#define HAS_SELECT 1
-#define HAS_POLL 1
+
 #if HAS_EPOLL
 #include "ev_epoll.c"
 #endif

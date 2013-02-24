@@ -10,13 +10,13 @@
 #include "../include/wod_event.h"
 #define HASH_SIZE 32
 #define SLEEP 1E1//1ms
-struct wod_event_loop;
+struct wod_event_main;
 struct wod_event_pollor{
-	int (*new)(struct wod_event_loop * loop,int flag);
-	void (*delete)(struct wod_event_loop *loop);
-	int (*add)(struct wod_event_loop *loop,int fd,int mask);
-	int	(*remove)(struct wod_event_loop *loop , int fd,int mask);
-	int (*poll)(struct wod_event_loop *loop,long long timeOut);
+	int (*new)(struct wod_event_main * loop,int flag);
+	void (*delete)(struct wod_event_main *loop);
+	int (*add)(struct wod_event_main *loop,int fd,int mask);
+	int	(*remove)(struct wod_event_main *loop , int fd,int mask);
+	int (*poll)(struct wod_event_main *loop,long long timeOut);
 };
 struct wod_event_time{
 	int id;
@@ -45,7 +45,7 @@ struct wod_event_userdef{
 	void * userdefArg;
 	struct wod_event_userdef * next;
 };
-struct wod_event_loop{
+struct wod_event_main{
 	struct wod_event_pollor pollor;
 	void * pollorData;
 	int isQuit;

@@ -42,7 +42,7 @@ _arr_push(struct pollData *pdata,int fd,int events)
 	pdata->len++;
 }
 static int 
-poll_new(struct wod_event_loop * loop,int falg)
+poll_new(struct wod_event_main * loop,int falg)
 {
 	struct pollData * p = malloc(sizeof(struct pollData));
 	assert(p);
@@ -53,14 +53,14 @@ poll_new(struct wod_event_loop * loop,int falg)
 	return WV_ROK;
 }
 static void 
-poll_delete(struct wod_event_loop *loop)
+poll_delete(struct wod_event_main *loop)
 {
 	struct pollData * p = ( struct pollData *)loop->pollorData;
 	free(p->pfdArr);
 	free(p);
 }
 static int 
-poll_add(struct wod_event_loop *loop,int fd,int mask)
+poll_add(struct wod_event_main *loop,int fd,int mask)
 {
 	
 	struct pollData * p = ( struct pollData *)loop->pollorData;
@@ -80,7 +80,7 @@ poll_add(struct wod_event_loop *loop,int fd,int mask)
 	return WV_ROK;
 }
 static int 
-poll_remove(struct wod_event_loop *loop , int fd,int mask)
+poll_remove(struct wod_event_main *loop , int fd,int mask)
 {
 	struct pollData * p = (struct pollData *)loop->pollorData;
 	mask =(loop->files[fd].event & (~mask));
@@ -103,7 +103,7 @@ poll_remove(struct wod_event_loop *loop , int fd,int mask)
 	return -EINVAL;
 }
 static  int 
-poll_poll(struct wod_event_loop *loop,long long timeOut)
+poll_poll(struct wod_event_main *loop,long long timeOut)
 {
 	struct pollData * p = (struct pollData *)loop->pollorData;
 	
