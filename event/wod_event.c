@@ -5,11 +5,11 @@
  *      Author: goalworld
  */
 #include "wod_config.h"
-#include "evinner.h"
+#include "wod_evinner.h"
 #include "wod_time.h"
+#include "wod_sys.h"
 #include <string.h>
 #include <stdlib.h>
-
 #include <errno.h>
 
 static int _init_pollor(struct wod_event_pollor* pllor,int type);
@@ -77,7 +77,7 @@ _processIO(struct wod_event_main *loop)
 			}
 		}
 	}else{
-		wod_time_sleep_usecond(tmpsec);
+		wod_sys_usleep(tmpsec);
 	}
 }
 static void _processIdle(struct wod_event_main *loop){

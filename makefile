@@ -18,7 +18,8 @@ SRCS=./container/wod_array.c \
 				./container/wod_queue.c \
 				./event/wod_event.c \
 				./net/wod_net_unix.c\
-				./time/wod_time.c
+				./time/wod_time.c\
+				./sys/wod_sys.c
 $(BUILD)libwod.so : $(SRCS)
 			$(CC) $(CFLAGS) $(INC_DIR) $(SHARED) -o $@ $^ 
 			
