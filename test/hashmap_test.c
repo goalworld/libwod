@@ -12,18 +12,11 @@
 #include <time.h>
 #include <memory.h>
  #include <assert.h>
- #include <sys/time.h>
+#include <wod_time.h>
 static unsigned 	
-hashFunc(void *env,const void *key)
+hash_func(void *env,const void *key)
 {
 	return (unsigned)key;
-}
-static double
-rainGetTime()
-{
-	struct timeval time;
-	gettimeofday(&time,(void *)0);
-	return time.tv_sec *1E6 + time.tv_usec ;
 }
 static void test(unsigned  num );
 int main(int argc, char const *argv[])
@@ -41,22 +34,22 @@ test(unsigned  num )
 {
 	struct wod_hash_map_type whmt;
 	memset(&whmt,0,sizeof(whmt));
-	whmt.hash_func = hashFunc;
+	whmt.hash_func = hash_func;
 	struct wod_hash_map *hm = wod_hashmap_new(whmt,NULL);
 	int i=0;
-	double pre = rainGetTime(),df;
+	long long pre = wod_time_usecond(),df;
 	for(;i<num;i++){
 		wod_hashmap_insert(hm,(void *)i,(void *)i);
 	}
 	printf("[BEGIN]number : %d\n",num);
-	df = rainGetTime()-pre;
+	df = wod_time_usecond()-pre;
 	printf("[Insert]%d >>> all:%f---one:%f\n",num,df,df/num);
-	pre = rainGetTime();
+	pre = wod_time_usecond();
 	for( i=0;i<num;i++){
 		wod_hashmap_query(hm,(void *)i);
 	}
-	df = rainGetTime()-pre;
-	printf("[Query] %d>>> all:%f---one:%f\n",num,df,df/num);
+	df = wod_time_usecond()-pre;
+	printf("[Query] %d>>> all:%ld---one:%ld\n",num,df,df/num);
 	puts("[END]");
 	wod_hashmap_delete(hm);
 }
