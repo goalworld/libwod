@@ -84,6 +84,10 @@ wod_net_tcp_listen(enum wodNetTCP et,const char * ip,int port)
 	if(listen(sfd,64) < 0){
 		return -errno;
 	}
+	int flag = 1;
+	if( setsockopt(sfd,IPPROTO_TCP,TCP_NODELAY,&flag,sizeof(flag)) < 0){
+		return -errno;
+	}
 	return sfd;
 }
 wod_socket_t
