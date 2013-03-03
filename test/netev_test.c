@@ -1,18 +1,18 @@
 #include "wod_net.h"
 #include "wod_event.h"
+#include "wod_errno.h"
 #include <string.h>
 #include <stdio.h>
 #include <errno.h>
 #define BUF_SZ 1024
-static void _doAccept(struct wod_event_main *loop,void * nv,int mask);
-static void _doRead(struct wod_event_main *loop,void * nv,int mask);
-static int _doTimer(struct wod_event_main * loop,void * nv);
+static void _doAccept(struct wod_event *loop,void * nv,int mask);
+static void _doRead(struct wod_event *loop,void * nv,int mask);
+static int _doTimer(struct wod_event * loop,void * nv);
 int 
 main(int argc, char const *argv[])
 {
-	struct wod_event_main *loop;
-	loop = wod_event_main_new(10240,WV_POLL_POLL);
-	if( !loop ){
+	struct wod_event *loop;
+	if( wod_event_create(&loop,10240,WV_POLL_POLL) != WOD_OK){
 		printf("%s\n", "loop create error" );
 		return 1;
 	}
@@ -24,21 +24,22 @@ main(int argc, char const *argv[])
 	printf("%d\n",fd);
 	wod_net_noblock(fd,1);
 	wod_event_io_add(loop,fd,WV_IO_READ,_doAccept,(void *)(intptr_t)(fd));
-	int id = wod_event_time_add(loop,10000,_doTimer,NULL);
-	wod_event_main_loop(loop);
+	//int id =
+	wod_event_time_add(loop,10000,_doTimer,NULL);
+	wod_event_loop(loop);
 	return 0;
 }
 static int
-_doTimer(struct wod_event_main * loop,void * nv)
+_doTimer(struct wod_event * loop,void * nv)
 {
 	static long long pre = 0;
 	long long cut = wod_time_usecond();
 	printf("hello  %ld\n",cut-pre);
 	pre = cut;
-	return WV_ROK;
+	return WOD_OK;
 }
 static void
-_doAccept(struct wod_event_main *loop,void * nv,int mask)
+_doAccept(struct wod_event *loop,void * nv,int mask)
 {
 	wod_socket_t fd = (wod_socket_t)(long)(nv);
 	wod_socket_t cfd = wod_net_accept(fd);
@@ -57,7 +58,7 @@ _doAccept(struct wod_event_main *loop,void * nv,int mask)
 	}
 }
 static void 
-_doRead(struct wod_event_main *loop,void * nv,int mask)
+_doRead(struct wod_event *loop,void * nv,int mask)
 {
 	wod_socket_t fd = (wod_socket_t)(long)(nv);
 	unsigned char buf[BUF_SZ+1];

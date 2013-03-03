@@ -8,7 +8,7 @@
 #ifndef WOD_SYS_H_
 #define WOD_SYS_H_
 
-
-void wod_sys_usleep(long long usec);
+#include "wod_type.h"
+void wod_sys_usleep(wod_i64_t usec);
 
 #endif /* WOD_SYS_H_ */

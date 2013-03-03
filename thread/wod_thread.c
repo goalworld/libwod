@@ -8,14 +8,11 @@
 #include <pthread.h>
 #include "wod_thread.h"
 #include "wod_errno.h"
+#include <assert.h>
 struct wod_thread
 {
 	pthread_t pid;
-	void *arg;
-	wod_thread_proc func;
-	void *retval;
 };
-
 int
 wod_thread_create(wod_thread_t ** thread,wod_thread_proc,void*arg,size_t stack_size)
 {
@@ -26,7 +23,7 @@ wod_thread_create(wod_thread_t ** thread,wod_thread_proc,void*arg,size_t stack_s
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 	pthread_attr_setstacksize(&attr,stack_size);
-	pthread_create(&(*thread)->pid,&attr,wod_thread_proc,*thread);
+	pthread_create(&(*thread)->pid,&attr,wod_thread_proc,arg);
 	return WOD_OK;
 }
 int
@@ -42,14 +39,14 @@ wod_thread_detach(wod_thread_t *thread,int *state)
 void
 wod_thread_exit(wod_thread_t *thread,void *retvalue)
 {
-	thread->retval = retvalue;
+	assert((thread->pid == pthread_self()));
 	pthread_exit(thread->pid,retvalue);
 	free(thread);
 }
 void
 wod_thread_yeild()
 {
-
+	sched_yield();
 }
 
 

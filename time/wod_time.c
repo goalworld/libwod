@@ -1,7 +1,7 @@
 #include "wod_time.h"
 #include <sys/time.h>
 #include <stddef.h>
-long long
+wod_i64_t
 wod_time_usecond()
 {
 	struct timeval time;
