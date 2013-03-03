@@ -16,7 +16,7 @@ static int _init_pollor(struct wod_event_pollor* pllor,int type);
 
 
 static inline int
-_hashFunction(int id)
+_hash_function(int id)
 {
 	return id%HASH_SIZE;
 }
@@ -25,7 +25,7 @@ wod_event_main_new(int set_size,int type)
 {
 	struct wod_event_main * loop = malloc(sizeof(struct wod_event_main));
 	int ret = _init_pollor(&loop->pollor,type);
-	if(ret != WV_ROK){
+	if(ret != WOD_OK){
 		free(loop);
 		return NULL;
 	}
@@ -33,7 +33,7 @@ wod_event_main_new(int set_size,int type)
 	loop->idIndex = loop->set_size;
 	loop->userdefHead = NULL;
 	ret = loop->pollor.new(loop,0);
-	if(ret != WV_ROK){
+	if(ret != WOD_OK){
 		free(loop);
 		return NULL;
 	}
@@ -157,7 +157,7 @@ int wod_event_io_add(struct wod_event_main *loop,int fd,int event,wod_event_io_f
 	struct wod_event_io *pFile = &loop->files[fd];
 	pFile->fd = fd;
 	int ret = loop->pollor.add(loop,fd,event);
-	if(ret != WV_ROK){
+	if(ret != WOD_OK){
 		return ret;
 	}
 	if(pFile->event == WV_NONE){
@@ -201,13 +201,13 @@ int wod_event_time_add(struct wod_event_main *loop,long long usec,wod_event_time
 	pTime->timeArg = cbArg;
 	pTime->timeProc = cb;
 	pTime->dispose = 0;
-	int hash = _hashFunction(pTime->id);
+	int hash = _hash_function(pTime->id);
 	pTime->next = loop->hashMap[hash];
 	loop->hashMap[hash] = pTime;
 	return pTime->id;
 }
 void wod_event_time_remove(struct wod_event_main * loop,int id){
-	int hash = _hashFunction(id);
+	int hash = _hash_function(id);
 	struct wod_event_time*tmp=loop->hashMap[hash];
 	while(tmp){
 		if(tmp->id == id){
@@ -253,19 +253,19 @@ static int _init_pollor(struct wod_event_pollor* pllor,int type){
 	if(type == WV_POLL_EPOLL){
 #if HAS_EPOLL
 		SET_POLLER(poller,epoll);
-		return WV_ROK;
+		return WOD_OK;
 #endif
 		return -EINVAL;
 	}else if(type == WV_POLL_SELECT){
 #if HAS_SELECT
 		SET_POLLER(poller,select);
-		return WV_ROK;
+		return WOD_OK;
 #endif
 		return -EINVAL;
 	}else if(type == WV_POLL_POLL){
 #if HAS_POLL
 		SET_POLLER(poller,poll);
-		return WV_ROK;
+		return WOD_OK;
 #endif
 		return -EINVAL;
 	}

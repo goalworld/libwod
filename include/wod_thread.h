@@ -1,21 +1,20 @@
 #ifndef _WOD_THREAD_H_
 #define _WOD_THREAD_H_
+#include <stddef.h>
 typedef struct wod_thread wod_thread_t;
-typedef int (*wod_thread_proc)(void *argc);
-wod_thread_t *wod_thread_new(wod_thread_proc,int stack_size);
-void wod_thread_delete(wod_thread_t *thread);
-wod_thread_t * wod_thread_self();
-void wod_thread_join(wod_thread_t *thread,int *state);
-void wod_thread_detach(wod_thread_t *thread,int *state);
-void wod_thread_exit();
-void wod_thread_yeild();
+typedef void* (*wod_thread_proc)(void *argc);
+int wod_thread_create(wod_thread_t ** thread,wod_thread_proc,void*arg,size_t stack_size);
+int wod_thread_join(wod_thread_t *thread,void **state);
+int wod_thread_detach(wod_thread_t *thread);
+int wod_thread_exit(wod_thread_t *thread);
+int wod_thread_yeild();
 
 typedef struct wod_mutex wod_mutex_t;
-wod_mutext_t * wod_mutex_new();
+wod_mutex_t * wod_mutex_new();
 int wod_mutex_lock(wod_mutex_t *mtx);
-int wod_mutex_trylock(vod_mutex_t *mtx);
+int wod_mutex_trylock(wod_mutex_t *mtx);
 int wod_mutex_unlock(wod_mutex_t *mtx);
-int wod_mutext_lock_timeout(wod_mutext_t*mtx,long long timeout);
+int wod_mutext_lock_timeout(wod_mutex_t*mtx,long long timeout);
 void wod_mutex_delete(wod_mutex_t *mtx);
 
 typedef struct wod_rwlock wod_rwlock_t;

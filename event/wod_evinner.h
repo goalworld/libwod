@@ -8,6 +8,7 @@
 #ifndef WODEV_INNER_H_
 #define WODEV_INNER_H_
 #include "../include/wod_event.h"
+#include "wod_errno.h"
 #define HASH_SIZE 32
 #define SLEEP 10000000
 struct wod_event_main;

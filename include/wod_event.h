@@ -15,9 +15,6 @@ enum {
 	WV_IO_WRITE=0X02
 };
 enum{
-	WV_ROK = 0
-};
-enum{
 	WV_POLL_EPOLL,
 	WV_POLL_SELECT,
 	WV_POLL_POLL,

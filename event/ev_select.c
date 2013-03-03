@@ -23,7 +23,7 @@ select_new(struct wod_event_main * loop,int flag)
 	FD_ZERO(&p->rset);
 	FD_ZERO(&p->wset);
 	loop->pollorData = p;
-	return WV_ROK;
+	return WOD_OK;
 }
 static void
 select_delete(struct wod_event_main *loop)
@@ -43,7 +43,7 @@ select_add(struct wod_event_main *loop,int fd,int mask)
 	FD_CLR(fd,&p->wset);
 	if( mask & WV_IO_READ )FD_SET(fd,&p->rset);
 	if( mask & WV_IO_WRITE )FD_SET(fd,&p->wset);
-	return WV_ROK;
+	return WOD_OK;
 }
 static int
 select_remove(struct wod_event_main *loop , int fd,int mask)
@@ -61,7 +61,7 @@ select_remove(struct wod_event_main *loop , int fd,int mask)
 			if(pio->event != WV_NONE) p->maxfd = pio->fd;
 		}
 	}
-	return WV_ROK;
+	return WOD_OK;
 }
 static int
 select_poll(struct wod_event_main *loop,long long timeOut)

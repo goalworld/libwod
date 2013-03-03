@@ -22,7 +22,7 @@ epoll_new(struct wod_event_main * loop,int flag)
 		return -errno;
 	}
 	loop->pollorData = pInfo;
-	return WV_ROK;
+	return WOD_OK;
 }
 static void 
 epoll_delete(struct wod_event_main *loop)
@@ -52,7 +52,7 @@ epoll_add(struct wod_event_main *loop, int fd, int mask)
 			ret = epoll_ctl(pInfo->epFd,EPOLL_CTL_MOD,fd,&epEv);
 		}
 	}
-	return ret >=0 ? WV_ROK : -errno ;
+	return ret >=0 ? WOD_OK : -errno ;
 }
 
 static int 

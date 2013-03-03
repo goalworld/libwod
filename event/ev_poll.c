@@ -50,7 +50,7 @@ poll_new(struct wod_event_main * loop,int falg)
 	p->cap = 64;
 	p->len = 0;
 	loop->pollorData = p;
-	return WV_ROK;
+	return WOD_OK;
 }
 static void 
 poll_delete(struct wod_event_main *loop)
@@ -77,7 +77,7 @@ poll_add(struct wod_event_main *loop,int fd,int mask)
 		if( mask & WV_IO_WRITE )events |= POLLOUT;
 		_arr_push(p,fd,events);
 	}
-	return WV_ROK;
+	return WOD_OK;
 }
 static int 
 poll_remove(struct wod_event_main *loop , int fd,int mask)
@@ -98,7 +98,7 @@ poll_remove(struct wod_event_main *loop , int fd,int mask)
 			if( mask & WV_IO_READ )cut->events  |= POLLIN;
 			if( mask & WV_IO_WRITE )cut->events |= POLLOUT;
 		}
-		return WV_ROK;
+		return WOD_OK;
 	}
 	return -EINVAL;
 }
