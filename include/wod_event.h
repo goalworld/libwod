@@ -23,24 +23,24 @@ enum{
 	WV_POLL_POLL,
 	WV_POLL_KQUEUE
 };
-struct wod_event_main;
+typedef struct wod_event_main wod_event_main_t;
 
-typedef void (*wod_event_io_fn)(struct wod_event_main *loop,void * nv,int mask);
-typedef int (*wod_event_time_fn)(struct wod_event_main *loop,void * nv);
-typedef int (*wod_event_userdef_fn)(struct wod_event_main *loop,void * nv);
+typedef void (*wod_event_io_fn)(wod_event_main_t *loop,void * nv,int mask);
+typedef int (*wod_event_time_fn)(wod_event_main_t *loop,void * nv);
+typedef int (*wod_event_userdef_fn)(wod_event_main_t *loop,void * nv);
 
-struct wod_event_main * wod_event_main_new(int set_size,int type);
-void wod_event_main_delete(struct wod_event_main *);
-void wod_event_main_once(struct wod_event_main *);
-void wod_event_main_loop(struct wod_event_main *);
-void wod_event_main_stop(struct wod_event_main *);
+wod_event_main_t * wod_event_main_new(int set_size,int type);
+void wod_event_main_delete(wod_event_main_t *);
+void wod_event_main_once(wod_event_main_t *);
+void wod_event_main_loop(wod_event_main_t *);
+void wod_event_main_stop(wod_event_main_t *);
 
-int wod_event_io_add(struct wod_event_main *,int fd,int event,wod_event_io_fn cb,void *cbArg);
-void wod_event_io_remove(struct wod_event_main *,int id,int event);
+int wod_event_io_add(wod_event_main_t *,int fd,int event,wod_event_io_fn cb,void *cbArg);
+void wod_event_io_remove(wod_event_main_t *,int id,int event);
 int wod_event_io_wait(int fd,int mask,long long timeout);
-int wod_event_time_add(struct wod_event_main *,long long usec,wod_event_time_fn cb,void *cbArg);
-void wod_event_time_remove(struct wod_event_main *,int id);
-int wod_event_userdef_add(struct wod_event_main *,wod_event_userdef_fn cb,void *cbArg);
-void wod_event_userdef_remove(struct wod_event_main *,int id);
+int wod_event_time_add(wod_event_main_t *,long long usec,wod_event_time_fn cb,void *cbArg);
+void wod_event_time_remove(wod_event_main_t *,int id);
+int wod_event_userdef_add(wod_event_main_t *,wod_event_userdef_fn cb,void *cbArg);
+void wod_event_userdef_remove(wod_event_main_t *,int id);
 
 #endif /* GODEV_H_ */
