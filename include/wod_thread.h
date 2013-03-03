@@ -6,7 +6,7 @@ typedef void* (*wod_thread_proc)(void *argc);
 int wod_thread_create(wod_thread_t ** thread,wod_thread_proc,void*arg,size_t stack_size);
 int wod_thread_join(wod_thread_t *thread,void **state);
 int wod_thread_detach(wod_thread_t *thread);
-int wod_thread_exit(wod_thread_t *thread);
+void wod_thread_exit(wod_thread_t *thread,void *retvalue);
 int wod_thread_yeild();
 
 typedef struct wod_mutex wod_mutex_t;

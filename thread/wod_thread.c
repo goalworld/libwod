@@ -13,6 +13,7 @@ struct wod_thread
 	pthread_t pid;
 	void *arg;
 	wod_thread_proc func;
+	void *retval;
 };
 
 int
@@ -28,20 +29,22 @@ wod_thread_create(wod_thread_t ** thread,wod_thread_proc,void*arg,size_t stack_s
 	pthread_create(&(*thread)->pid,&attr,wod_thread_proc,*thread);
 	return WOD_OK;
 }
-void
+int
 wod_thread_join(wod_thread_t *thread,void **state)
 {
-	pthread_join(thread->pid,state);
+	return pthread_join(thread->pid,state);
 }
-void
+int
 wod_thread_detach(wod_thread_t *thread,int *state)
 {
-	pthread_detach(thread->pid);
+	return pthread_detach(thread->pid);
 }
 void
-wod_thread_exit()
+wod_thread_exit(wod_thread_t *thread,void *retvalue)
 {
-
+	thread->retval = retvalue;
+	pthread_exit(thread->pid,retvalue);
+	free(thread);
 }
 void
 wod_thread_yeild()
