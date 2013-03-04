@@ -20,9 +20,12 @@ SRCS=./container/wod_array.c \
 				./event/wod_event.c \
 				./net/wod_net_unix.c\
 				./time/wod_time.c\
-				./sys/wod_sys.c
+				./sys/wod_sys.c\
+				./thread/unix/wod_thread.c\
+				./thread/unix/wod_mutex_cond.c\
+				./thread/unix/wod_rwlock.c
 $(BUILD)libwod.so : $(SRCS)
-			$(CC) $(CFLAGS) $(INC_DIR) $(SHARED) -o $@ $^ 
+			$(CC) $(CFLAGS) $(INC_DIR) $(SHARED) -o $@ $^  -lpthread
 			
 $(BUILD)test_netev:./test/netev_test.c
 			$(CC) $(CFLAGS) $(INC_DIR) -o $@ $^ -lwod $(LIB_DIR)
