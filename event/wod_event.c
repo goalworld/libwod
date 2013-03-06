@@ -82,7 +82,7 @@ _processIO(struct wod_event *loop)
 			}
 		}
 	}else{
-		wod_sys_usleep(tmpsec);
+		wod_usleep(tmpsec);
 	}
 }
 static void _processIdle(struct wod_event *loop){

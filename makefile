@@ -20,7 +20,6 @@ SRCS=./container/wod_array.c \
 				./event/wod_event.c \
 				./net/wod_net_unix.c\
 				./time/wod_time.c\
-				./sys/wod_sys.c\
 				./thread/unix/wod_thread.c\
 				./thread/unix/wod_mutex_cond.c\
 				./thread/unix/wod_rwlock.c

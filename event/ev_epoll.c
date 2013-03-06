@@ -63,7 +63,6 @@ epoll_remove(struct wod_event *loop ,int fd, int mask)
 	epEv.data.fd = fd;
 	mask =(loop->files[fd].event & (~mask));
 	epEv.events = (mask & WV_IO_READ) ? EPOLLIN:0 |(mask & WV_IO_WRITE) ? EPOLLOUT:0 ;
-	int ret;
 	if(mask == WV_NONE){
 		return epoll_ctl(pInfo->epFd,EPOLL_CTL_DEL,fd,&epEv);
 	}else{

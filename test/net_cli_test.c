@@ -23,5 +23,6 @@ int main()
 	}
 	printf("%d\n",8199);
 	wod_net_write(fd,buf,sizeof(buf));
+	return 0;
 }
 

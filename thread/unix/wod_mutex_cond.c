@@ -23,8 +23,8 @@ wod_mutex_create(wod_mutex_t **mtx)
 wod_ret_t
 wod_mutex_lock(wod_mutex_t *mtx)
 {
-	int errno =pthread_mutex_lock(&mtx->mtx);
-	if(  errno == 0){
+	int err =pthread_mutex_lock(&mtx->mtx);
+	if(  err == 0){
 		return WOD_OK;
 	}
 	return errno;

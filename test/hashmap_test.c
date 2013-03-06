@@ -16,7 +16,7 @@
 static unsigned 	
 hash_func(void *env,const void *key)
 {
-	return (unsigned)key;
+	return (unsigned)(ptrdiff_t)key;
 }
 static void test(unsigned  num );
 int main(int argc, char const *argv[])
@@ -39,17 +39,17 @@ test(unsigned  num )
 	int i=0;
 	long long pre = wod_time_usecond(),df;
 	for(;i<num;i++){
-		wod_hashmap_insert(hm,(void *)i,(void *)i);
+		wod_hashmap_insert(hm,(void *)(ptrdiff_t)i,(void *)(ptrdiff_t)i);
 	}
 	printf("[BEGIN]number : %d\n",num);
 	df = wod_time_usecond()-pre;
-	printf("[Insert]%d >>> all:%f---one:%f\n",num,df,df/num);
+	printf("[Insert]%d >>> all:%lld---one:%lld\n",num,df,df/num);
 	pre = wod_time_usecond();
 	for( i=0;i<num;i++){
-		wod_hashmap_query(hm,(void *)i);
+		wod_hashmap_query(hm,(void *)(ptrdiff_t)i);
 	}
 	df = wod_time_usecond()-pre;
-	printf("[Query] %d>>> all:%ld---one:%ld\n",num,df,df/num);
+	printf("[Query] %d>>> all:%lld---one:%lld\n",num,df,df/num);
 	puts("[END]");
 	wod_hashmap_delete(hm);
 }
