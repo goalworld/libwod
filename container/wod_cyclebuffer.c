@@ -8,10 +8,10 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <assert.h>
-static int _resize_byuse(wod_cycle_buffer_t* cycle,int usesz);
+static int _resize_byuse(wod_cycle_buffer_t* cycle,size_t usesz);
 static int 	_get_free_sz(wod_cycle_buffer_t* cycle);
 int
-wod_cycle_buffer_init( wod_cycle_buffer_t* cycle,int defsize)
+wod_cycle_buffer_init( wod_cycle_buffer_t* cycle,size_t defsize)
 {
 	if(!cycle || defsize <= 0){
 		return -1;
@@ -23,7 +23,7 @@ wod_cycle_buffer_init( wod_cycle_buffer_t* cycle,int defsize)
 	return 0;
 }
 int
-wod_cycle_buffer_push(wod_cycle_buffer_t* cycle,void *buf,int bufsz)
+wod_cycle_buffer_push(wod_cycle_buffer_t* cycle,void *buf,size_t bufsz)
 {
 	if(!buf || bufsz<=0){
 		return -1;
@@ -49,7 +49,7 @@ wod_cycle_buffer_push(wod_cycle_buffer_t* cycle,void *buf,int bufsz)
 }
 
 void
-wod_cycle_buffer_pop(wod_cycle_buffer_t* cycle,int sz)
+wod_cycle_buffer_pop(wod_cycle_buffer_t* cycle,size_t sz)
 {
 	int usedsz = cycle->cap - _get_free_sz(cycle);
 	if(usedsz > sz){
@@ -77,10 +77,11 @@ wod_cycle_buffer_get_used(wod_cycle_buffer_t* cycle,wod_cycle_pair_t * pair)
 			pair->second.sz = 0;
 		}
 	}
+	pair->cutbuf = NULL;
 	return 0;
 }
 int
-wod_cycle_buffer_grow(wod_cycle_buffer_t* cycle,int freesize,wod_cycle_pair_t *pair)
+wod_cycle_buffer_grow(wod_cycle_buffer_t* cycle,size_t freesize,wod_cycle_pair_t *pair)
 {
 	if( freesize<0){
 		return -1;
@@ -119,7 +120,7 @@ wod_cycle_buffer_grow(wod_cycle_buffer_t* cycle,int freesize,wod_cycle_pair_t *p
 	return 0;
 }
 void
-wod_cycle_buffer_back(wod_cycle_buffer_t* cycle,int backsz)
+wod_cycle_buffer_back(wod_cycle_buffer_t* cycle,size_t backsz)
 {
 	int usedsz = cycle->cap - _get_free_sz(cycle);
 	if(usedsz > backsz){
@@ -151,12 +152,37 @@ wod_cycle_buffer_empty( wod_cycle_buffer_t* cycle )
 {
 	return (cycle->head == cycle->tail);
 }
-static int
-_resize_byuse(wod_cycle_buffer_t* cycle,int usesz)
+int
+wod_cycle_pair_readsz(wod_cycle_pair_t * pair,void *buf,size_t sz)
 {
-	int freesize = _get_free_sz(cycle);
-	int newodaps = cycle->cap;
-	int tmp = freesize;
+	int all = wod_cycle_pair_sz(pair);
+	if(all < sz){
+		return -1;
+	}
+	if(pair->first.sz > sz){
+		memcpy(buf,pair->first.buf,sz);
+		pair->first.sz -=  sz;
+		pair->first.buf = (char *)pair->first.buf + sz;
+		return 0;
+	}
+	if(pair->first.sz > 0){
+		memcpy(buf,pair->first.buf,pair->first.sz);
+		buf = (char *)buf+pair->first.sz;
+		sz -= pair->first.sz;
+		pair->first.sz = 0;
+		pair->first.buf = NULL;
+	}
+	memcpy(buf,pair->second.buf,sz);
+	pair->second.sz -=  sz;
+	pair->second.buf = (char *)pair->second.buf + sz;
+	return 0;
+}
+static int
+_resize_byuse(wod_cycle_buffer_t* cycle,size_t usesz)
+{
+	size_t freesize = _get_free_sz(cycle);
+	size_t newodaps = cycle->cap;
+	size_t tmp = freesize;
 	while(tmp <= usesz){
 		tmp += newodaps;
 		newodaps*=2;
@@ -178,15 +204,15 @@ _resize_byuse(wod_cycle_buffer_t* cycle,int usesz)
 				return -1;
 			}
 			if(cycle->head > cycle->tail){
-				int fsz = cycle->cap-cycle->head;
-				int esz = cycle->tail;
+				size_t fsz = cycle->cap-cycle->head;
+				size_t esz = cycle->tail;
 				memcpy(newbuf,cycle->buf+cycle->head,fsz);
 				memcpy(newbuf,cycle->buf,esz);
 				cycle->head = 0;
 				cycle->tail = fsz+esz;
 				cycle->cap = newodaps;
 			}else{
-				int sz = cycle->tail-cycle->head;
+				size_t sz = cycle->tail-cycle->head;
 				memcpy(newbuf,cycle->buf+cycle->head,sz);
 
 				cycle->head = 0;

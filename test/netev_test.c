@@ -32,9 +32,9 @@ main(int argc, char const *argv[])
 static int
 _doTimer(struct wod_event * loop,void * nv)
 {
-	static long long pre = 0;
-	long long cut = wod_time_usecond();
-	printf("hello  %ld\n",cut-pre);
+	static wod_i64_t pre = 0;
+	wod_i64_t cut = wod_time_usecond();
+	printf("hello  %lld\n",cut-pre);
 	pre = cut;
 	return WOD_OK;
 }
