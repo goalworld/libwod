@@ -92,7 +92,40 @@ wod_cycle_buffer_get_used(wod_cycle_buffer_t* cycle,wod_cycle_pair_t * pair)
 	return 0;
 }
 int
-wod_cycle_buffer_grow(wod_cycle_buffer_t* cycle,size_t freesize,wod_cycle_pair_t *pair)
+wod_cycle_buffer_get_unused(wod_cycle_buffer_t* cycle,wod_cycle_pair_t * pair,size_t needsz)
+{
+	if( needsz == 0){
+		needsz = _get_free_sz(cycle);
+		if(needsz == 0){
+			return -1;
+		}
+	}
+	else if( _resize_byuse(cycle,needsz) != 0){
+		return -1;
+	}
+	if(cycle->head > cycle->tail){
+		pair->first.buf = cycle->buf + cycle->tail;
+		pair->first.sz = needsz;
+		pair->second.buf = NULL;
+		pair->second.sz = 0;
+	}else{
+		int efz = cycle->cap - cycle->tail;
+		if(needsz > efz){
+			pair->first.buf = cycle->buf + cycle->tail;
+			pair->first.sz = efz;
+			pair->second.buf = cycle->buf;
+			pair->second.sz = cycle->head;
+		}else{
+			pair->first.buf = cycle->buf + cycle->tail;
+			pair->first.sz = needsz;
+			pair->second.buf = NULL;
+			pair->second.sz = 0;
+		}
+	}
+	return 0;
+}
+int
+wod_cycle_buffer_grow(wod_cycle_buffer_t* cycle,size_t freesize)
 {
 	if( freesize<0){
 		return -1;
@@ -107,38 +140,16 @@ wod_cycle_buffer_grow(wod_cycle_buffer_t* cycle,size_t freesize,wod_cycle_pair_t
 		return -1;
 	}
 	if(cycle->head > cycle->tail){
-		pair->first.buf = cycle->buf + cycle->tail;
-		pair->first.sz = freesize;
-		pair->second.buf = NULL;
-		pair->second.sz = 0;
 		cycle->tail+=freesize;
 	}else{
 		int efz = cycle->cap - cycle->tail;
 		if(freesize > efz){
-			pair->first.buf = cycle->buf + cycle->tail;
-			pair->first.sz = efz;
-			pair->second.buf = cycle->buf;
-			pair->second.sz = cycle->head;
 			cycle->tail = freesize-efz;
 		}else{
-			pair->first.buf = cycle->buf + cycle->tail;
-			pair->first.sz = freesize;
-			pair->second.buf = NULL;
-			pair->second.sz = 0;
 			cycle->tail+=freesize;
 		}
 	}
 	return 0;
-}
-void
-wod_cycle_buffer_back(wod_cycle_buffer_t* cycle,size_t backsz)
-{
-	int usedsz = cycle->cap - _get_free_sz(cycle);
-	if(usedsz > backsz){
-		cycle->tail = (cycle->tail - backsz + cycle->cap)%cycle->cap;
-	}else{
-		cycle->head = cycle->tail = 0;
-	}
 }
 void
 wod_cycle_buffer_destroy( wod_cycle_buffer_t* cycle )

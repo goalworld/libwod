@@ -25,8 +25,11 @@ typedef struct wod_cycle_pair
 }wod_cycle_pair_t;
 int wod_cycle_buffer_init( wod_cycle_buffer_t* cycle,size_t defsize);
 void wod_cycle_buffer_destroy( wod_cycle_buffer_t* cycle );
-int wod_cycle_buffer_grow(wod_cycle_buffer_t* cycle,size_t growsz,struct wod_cycle_pair *pair);
-void wod_cycle_buffer_back(wod_cycle_buffer_t* cycle,size_t backsz);
+/*获取至少needsz的缓冲区大小 如果缓冲区大于needsz 将返回所有*/
+int wod_cycle_buffer_get_unused(wod_cycle_buffer_t* cycle,wod_cycle_pair_t * pair,size_t needsz);
+/*让使用的BUFFER增加 但不填充任何内容*/
+int wod_cycle_buffer_grow(wod_cycle_buffer_t* cycle,size_t growsz);
+/*让使用的BUFFER增加 而且在增加的那段位置填充BUF所指向的内容*/
 int wod_cycle_buffer_push(wod_cycle_buffer_t* cycle,void *buf,size_t sz);
 void wod_cycle_buffer_pop(wod_cycle_buffer_t* cycle,size_t sz);
 size_t wod_cycle_buffer_used_size(wod_cycle_buffer_t* cycle);
