@@ -25,6 +25,7 @@ struct wod_socket_buf{
 };
 wod_socket_t wod_net_tcp_listen(enum wodNetTCP,const char * addr,int port);
 wod_socket_t wod_net_tcp_connect(enum wodNetTCP,const char * addr,int port);
+//wod_socket_t wod_net_tcp_connect_noblock(enum wodNetTCP,const char * addr,int port);
 wod_socket_t wod_net_accept( wod_socket_t fd);
 int  wod_net_close(wod_socket_t fd);
 

@@ -11,7 +11,6 @@
 #include "wod_config.h"
 #include "wod_evinner.h"
 #include "wod_time.h"
-#include "wod_sys.h"
 #include "wod_errno.h"
 static int _init_pollor(struct wod_event_pollor* pllor,int type);
 

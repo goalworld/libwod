@@ -11,14 +11,14 @@
 #include "wod_errno.h"
 #define HASH_SIZE 32
 #define SLEEP 10000000
-struct wod_event;
 struct wod_event_pollor{
-	int (*new)(struct wod_event * loop,int flag);
-	void (*delete)(struct wod_event *loop);
-	int (*add)(struct wod_event *loop,int fd,int mask);
-	int	(*remove)(struct wod_event *loop , int fd,int mask);
-	int (*poll)(struct wod_event *loop,long long timeOut);
+	int (*new)(wod_event_t * loop,int flag);
+	void (*delete)(wod_event_t *loop);
+	int (*add)(wod_event_t *loop,int fd,int mask);
+	int	(*remove)(wod_event_t *loop , int fd,int mask);
+	int (*poll)(wod_event_t *loop,long long timeOut);
 };
+typedef struct  wod_event_time wod_event_time_t;
 struct wod_event_time{
 	int id;
 	wod_event_time_fn timeProc;
@@ -30,6 +30,7 @@ struct wod_event_time{
 	int repetTims;
 	struct wod_event_time *next;
 };
+typedef struct  wod_event_io wod_event_io_t;
 struct wod_event_io{
 	int fd;
 	wod_event_io_fn readProc;
@@ -39,6 +40,7 @@ struct wod_event_io{
 	int event;//WV_NONE
 	int revent;//WV_NONE
 };
+typedef struct wod_event_userdef wod_event_userdef_t;
 struct wod_event_userdef{
 	int id;
 	wod_event_userdef_fn idluceProc;
