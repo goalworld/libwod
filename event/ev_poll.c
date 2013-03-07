@@ -11,14 +11,15 @@
                short revents;     //returned events 
            };
 */
-struct pollData
+typedef struct poll_data poll_data_t;
+struct poll_data
 {
 	struct pollfd * pfdArr;
 	int cap;
 	int len;
 };
 static int 
-_get_index(struct pollData * pdata,int fd)
+_get_index(poll_data_t * pdata,int fd)
 {
 	int i=0;
 	struct pollfd *cut;
@@ -31,7 +32,7 @@ _get_index(struct pollData * pdata,int fd)
 	return -1;
 }
 static void
-_arr_push(struct pollData *pdata,int fd,int events)
+_arr_push(poll_data_t *pdata,int fd,int events)
 {
 	if(pdata->len == pdata->cap){
 		pdata->cap *=2;
@@ -44,7 +45,7 @@ _arr_push(struct pollData *pdata,int fd,int events)
 static int 
 poll_new(struct wod_event * loop,int falg)
 {
-	struct pollData * p = malloc(sizeof(struct pollData));
+	poll_data_t * p = malloc(sizeof(poll_data_t));
 	assert(p);
 	p->pfdArr = malloc(sizeof(struct pollfd)*64);
 	p->cap = 64;
@@ -55,7 +56,7 @@ poll_new(struct wod_event * loop,int falg)
 static void 
 poll_delete(struct wod_event *loop)
 {
-	struct pollData * p = ( struct pollData *)loop->pollorData;
+	poll_data_t * p = ( poll_data_t *)loop->pollorData;
 	free(p->pfdArr);
 	free(p);
 }
@@ -63,7 +64,7 @@ static int
 poll_add(struct wod_event *loop,int fd,int mask)
 {
 	
-	struct pollData * p = ( struct pollData *)loop->pollorData;
+	poll_data_t * p = ( poll_data_t *)loop->pollorData;
 	mask |=loop->files[fd].event;
 	struct pollfd *cut;
 	int ids = _get_index(p,fd);
@@ -82,7 +83,7 @@ poll_add(struct wod_event *loop,int fd,int mask)
 static int 
 poll_remove(struct wod_event *loop , int fd,int mask)
 {
-	struct pollData * p = (struct pollData *)loop->pollorData;
+	poll_data_t * p = (poll_data_t *)loop->pollorData;
 	mask =(loop->files[fd].event & (~mask));
 	struct pollfd *cut;
 	int ids = _get_index(p,fd);
@@ -105,7 +106,7 @@ poll_remove(struct wod_event *loop , int fd,int mask)
 static  int 
 poll_poll(struct wod_event *loop,long long timeOut)
 {
-	struct pollData * p = (struct pollData *)loop->pollorData;
+	poll_data_t * p = (poll_data_t *)loop->pollorData;
 	
 	int numelm = 0;
 	struct wod_event_io * pio;

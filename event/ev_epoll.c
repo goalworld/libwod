@@ -9,14 +9,14 @@
 #include <sys/epoll.h>
 #include <errno.h>
 #include <unistd.h>
-struct epoll_info{
+typedef struct wod_epoll_data{
 	int epFd;
-};
+}wod_epoll_data_t;
 
 static int 
-epoll_new(struct wod_event * loop,int flag)
+epoll_new(wod_event_t * loop,int flag)
 {
-	struct epoll_info * pInfo = malloc(sizeof(struct epoll_info));
+	wod_epoll_data_t * pInfo = malloc(sizeof(wod_epoll_data_t));
 	if((pInfo->epFd = epoll_create1(EPOLL_CLOEXEC)) < 0){
 		free(pInfo);
 		return -errno;
@@ -25,16 +25,16 @@ epoll_new(struct wod_event * loop,int flag)
 	return WOD_OK;
 }
 static void 
-epoll_delete(struct wod_event *loop)
+epoll_delete(wod_event_t *loop)
 {
-	struct epoll_info * pInfo = (struct epoll_info *)(loop->pollorData);
+	wod_epoll_data_t * pInfo = (wod_epoll_data_t *)(loop->pollorData);
 	close( pInfo->epFd );
 	free(loop->pollorData);
 }
 static int 
-epoll_add(struct wod_event *loop, int fd, int mask)
+epoll_add(wod_event_t *loop, int fd, int mask)
 {
-	struct epoll_info * pInfo = (struct epoll_info *)(loop->pollorData);
+	wod_epoll_data_t * pInfo = (wod_epoll_data_t *)(loop->pollorData);
 	struct epoll_event epEv;
 	epEv.data.fd = fd;
 	mask |=loop->files[fd].event;
@@ -56,9 +56,9 @@ epoll_add(struct wod_event *loop, int fd, int mask)
 }
 
 static int 
-epoll_remove(struct wod_event *loop ,int fd, int mask)
+epoll_remove(wod_event_t *loop ,int fd, int mask)
 {
-	struct epoll_info * pInfo = (struct epoll_info *)(loop->pollorData);
+	wod_epoll_data_t * pInfo = (wod_epoll_data_t *)(loop->pollorData);
 	struct epoll_event epEv;
 	epEv.data.fd = fd;
 	mask =(loop->files[fd].event & (~mask));
@@ -71,9 +71,9 @@ epoll_remove(struct wod_event *loop ,int fd, int mask)
 }
 
 static int 
-epoll_poll(struct wod_event *loop,long long timeOut)
+epoll_poll(wod_event_t *loop,long long timeOut)
 {
-	struct epoll_info * pInfo = (struct epoll_info *)(loop->pollorData);
+	wod_epoll_data_t * pInfo = (wod_epoll_data_t *)(loop->pollorData);
 	int ret;
 	struct epoll_event epEvs[loop->set_size];
 	while( ( ret = epoll_wait(pInfo->epFd,epEvs,loop->set_size,timeOut/1000) ) && ret < 0 && errno == EINTR);

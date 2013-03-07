@@ -56,13 +56,13 @@ wod_event_create(wod_event_t **ev,int set_size,int type)
 	return WOD_OK;
 }
 void
-wodEvLoopDelete(struct wod_event *loop)
+wodEvLoopDelete(wod_event_t *loop)
 {
 	loop->pollor.delete(loop);
 	free(loop);
 }
 static void
-_processIO(struct wod_event *loop)
+_processIO(wod_event_t *loop)
 {
 	long long tmpsec = loop->minSec;
 	if(loop->minSec > 1000){
@@ -84,7 +84,7 @@ _processIO(struct wod_event *loop)
 		wod_usleep(tmpsec);
 	}
 }
-static void _processIdle(struct wod_event *loop){
+static void _processIdle(wod_event_t *loop){
 	struct wod_event_userdef*tmp=loop->userdefHead,*pre = NULL,*next;
 	while(tmp){
 		next = tmp->next;
@@ -102,7 +102,7 @@ static void _processIdle(struct wod_event *loop){
 		tmp = next;
 	}
 }
-static void _processTime(struct wod_event *loop){
+static void _processTime(wod_event_t *loop){
 	int i =0;
 	loop->minSec = SLEEP;
 	for(i=0;i<HASH_SIZE;i++){
@@ -138,23 +138,23 @@ static void _processTime(struct wod_event *loop){
 		}
 	}
 }
-void wod_event_once(struct wod_event *loop){
+void wod_event_once(wod_event_t *loop){
 	_processTime(loop);
 	_processIdle(loop);
 	_processIO(loop);
 }
-void wod_event_loop(struct wod_event *loop){
+void wod_event_loop(wod_event_t *loop){
 	while(!loop->isQuit){
 		_processTime(loop);
 		_processIdle(loop);
 		_processIO(loop);
 	}
 }
-void wod_event_stop(struct wod_event *loop){
+void wod_event_stop(wod_event_t *loop){
 	loop->isQuit = 1;
 }
 
-int wod_event_io_add(struct wod_event *loop,int fd,int event,wod_event_io_fn cb,void *cbArg){
+int wod_event_io_add(wod_event_t *loop,int fd,int event,wod_event_io_fn cb,void *cbArg){
 	if(fd > loop->set_size || fd <= 0 || !cb){
 		return -EINVAL;
 	}
@@ -179,7 +179,7 @@ int wod_event_io_add(struct wod_event *loop,int fd,int event,wod_event_io_fn cb,
 
 	return fd;
 }
-void wod_event_io_remove(struct wod_event *loop,int id,int event){
+void wod_event_io_remove(wod_event_t *loop,int id,int event){
 	if(id > loop->set_size){
 		return ;
 	}
@@ -193,7 +193,7 @@ void wod_event_io_remove(struct wod_event *loop,int id,int event){
 	}
 }
 
-int wod_event_time_add(struct wod_event *loop,long long usec,wod_event_time_fn cb,void *cbArg){
+int wod_event_time_add(wod_event_t *loop,long long usec,wod_event_time_fn cb,void *cbArg){
 	if(!cb){
 		return -EINVAL;
 	}
@@ -210,7 +210,7 @@ int wod_event_time_add(struct wod_event *loop,long long usec,wod_event_time_fn c
 	loop->hashMap[hash] = pTime;
 	return pTime->id;
 }
-void wod_event_time_remove(struct wod_event * loop,int id){
+void wod_event_time_remove(wod_event_t * loop,int id){
 	int hash = _hash_function(id);
 	struct wod_event_time*tmp=loop->hashMap[hash];
 	while(tmp){
@@ -221,7 +221,7 @@ void wod_event_time_remove(struct wod_event * loop,int id){
 	}
 }
 
-int wod_event_userdef_add(struct wod_event *loop,wod_event_userdef_fn cb,void *cbArg){
+int wod_event_userdef_add(wod_event_t *loop,wod_event_userdef_fn cb,void *cbArg){
 	if(!cb){
 		return -EINVAL;
 	}
@@ -234,7 +234,7 @@ int wod_event_userdef_add(struct wod_event *loop,wod_event_userdef_fn cb,void *c
 	pIdle->dispose = 0;
 	return pIdle->id;
 }
-void wod_event_userdef_remove(struct wod_event *loop,int id){
+void wod_event_userdef_remove(wod_event_t *loop,int id){
 	struct wod_event_userdef*tmp=loop->userdefHead;
 	while(tmp){
 		if(tmp->id == id){
