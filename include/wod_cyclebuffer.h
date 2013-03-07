@@ -33,7 +33,7 @@ size_t wod_cycle_buffer_used_size(wod_cycle_buffer_t* cycle);
 int wod_cycle_buffer_get_used(wod_cycle_buffer_t* cycle,struct wod_cycle_pair * pair);
 bool wod_cycle_buffer_empty( wod_cycle_buffer_t* cycle );
 
-#define wod_cycle_pair_sz(pair) (pair)->first.sz + (pair)->second.sz;
+#define wod_cycle_pair_sz(pair) (pair)->first.sz + (pair)->second.sz
 
 int wod_cycle_pair_readsz(wod_cycle_pair_t * pair,void *buf,size_t sz);
 
