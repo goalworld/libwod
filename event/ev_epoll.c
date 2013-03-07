@@ -76,16 +76,21 @@ epoll_poll(wod_event_t *loop,long long timeOut)
 	wod_epoll_data_t * pInfo = (wod_epoll_data_t *)(loop->pollorData);
 	int ret;
 	struct epoll_event epEvs[loop->set_size];
-	while( ( ret = epoll_wait(pInfo->epFd,epEvs,loop->set_size,timeOut/1000) ) && ret < 0 && errno == EINTR);
+	while(1){
+		 ret = epoll_wait(pInfo->epFd,epEvs,loop->set_size,timeOut/1000);
+		 if(ret < 0 && (errno == EINTR)) continue;
+		 else break;
+
+	}
 	if(ret > 0){
 		int tmp = ret;
 		struct epoll_event * epEv = epEvs ;
 		int * pPendFd = loop->pendFds;
 		for(;tmp>0;tmp--){
-			loop->files[epEv->data.fd].revent = epEv->events & ( EPOLLIN | EPOLLHUP | EPOLLERR ) ? WV_IO_READ:0
-											|( epEv->events & ( EPOLLOUT | EPOLLHUP | EPOLLERR ) ) ? WV_IO_WRITE:0;
-			epEv++;
+			loop->files[epEv->data.fd].revent =
+			( ( epEv->events & (EPOLLIN | EPOLLHUP | EPOLLERR) ) > 0 ? WV_IO_READ:0 )
 			*(pPendFd++) = epEv->data.fd;
+			epEv++;
 		}
 	}
 	return ret;

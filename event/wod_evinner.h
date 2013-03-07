@@ -10,7 +10,7 @@
 #include "../include/wod_event.h"
 #include "wod_errno.h"
 #define HASH_SIZE 32
-#define SLEEP 10000000
+#define SLEEP 1000000
 struct wod_event_pollor{
 	int (*new)		( wod_event_t * loop, int flag );
 	void (*delete)	( wod_event_t *loop );

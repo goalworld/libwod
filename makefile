@@ -1,7 +1,7 @@
 BUILD=./build/
 INC_DIR=-I./include
 LIB_DIR=-L./build
-CFLAGS=-Wall -O
+CFLAGS=-Wall -O -g
 SHARED=-fPIC -shared
 CC = gcc
 all : $(BUILD)libwod.so $(BUILD)test_netev $(BUILD)test_echo $(BUILD)test_array $(BUILD)test_hashmap $(BUILD)test_cli $(BUILD)cyclebuf_test

@@ -12,11 +12,11 @@ int
 main(int argc, char const *argv[])
 {
 	struct wod_event *loop;
-	if( wod_event_create(&loop,10240,WV_POLL_POLL) != WOD_OK){
+	if( wod_event_create(&loop,10240,WV_POLL_EPOLL) != WOD_OK){
 		printf("%s\n", "loop create error" );
 		return 1;
 	}
-	wod_socket_t fd = wod_net_tcp_listen(TCP4,"0.0.0.0",8100);
+	wod_socket_t fd = wod_net_tcp_listen(TCP4,"0.0.0.0",8194);
 	if(fd < 0){
 		printf("%s\n", strerror(-fd) );
 		return 1;
@@ -25,8 +25,11 @@ main(int argc, char const *argv[])
 	wod_net_noblock(fd,1);
 	wod_event_io_add(loop,fd,WV_IO_READ,_doAccept,(void *)(intptr_t)(fd));
 	//int id =
-	wod_event_time_add(loop,10000,_doTimer,NULL);
-	wod_event_loop(loop);
+	//wod_event_time_add(loop,10000,_doTimer,NULL);
+	for(;;){
+		wod_event_once(loop);
+	}
+
 	return 0;
 }
 static int
