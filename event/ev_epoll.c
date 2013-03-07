@@ -89,6 +89,7 @@ epoll_poll(wod_event_t *loop,long long timeOut)
 		for(;tmp>0;tmp--){
 			loop->files[epEv->data.fd].revent =
 			( ( epEv->events & (EPOLLIN | EPOLLHUP | EPOLLERR) ) > 0 ? WV_IO_READ:0 )
+			|( ( epEv->events & (EPOLLOUT | EPOLLHUP | EPOLLERR) ) >0 ? WV_IO_WRITE:0 );
 			*(pPendFd++) = epEv->data.fd;
 			epEv++;
 		}
