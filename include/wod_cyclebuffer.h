@@ -18,7 +18,6 @@ typedef struct wod_cycle_buffer
 }wod_cycle_buffer_t;
 typedef struct wod_cycle_pair
 {
-	void *cutbuf;
 	struct {
 		void *buf;
 		size_t sz;
@@ -30,6 +29,7 @@ int wod_cycle_buffer_grow(wod_cycle_buffer_t* cycle,size_t growsz,struct wod_cyc
 void wod_cycle_buffer_back(wod_cycle_buffer_t* cycle,size_t backsz);
 int wod_cycle_buffer_push(wod_cycle_buffer_t* cycle,void *buf,size_t sz);
 void wod_cycle_buffer_pop(wod_cycle_buffer_t* cycle,size_t sz);
+size_t wod_cycle_buffer_used_size(wod_cycle_buffer_t* cycle);
 int wod_cycle_buffer_get_used(wod_cycle_buffer_t* cycle,struct wod_cycle_pair * pair);
 bool wod_cycle_buffer_empty( wod_cycle_buffer_t* cycle );
 

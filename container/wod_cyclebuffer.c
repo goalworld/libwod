@@ -58,6 +58,18 @@ wod_cycle_buffer_pop(wod_cycle_buffer_t* cycle,size_t sz)
 		cycle->head = cycle->tail = 0;
 	}
 }
+size_t
+wod_cycle_buffer_used_size(wod_cycle_buffer_t* cycle)
+{
+	if(cycle->head == cycle->tail){
+		return 0;
+	}
+	if(cycle->head > cycle->tail){
+		return  cycle->cap - cycle->head+cycle->tail;
+	}else{
+		return cycle->tail - cycle->head;
+	}
+}
 int
 wod_cycle_buffer_get_used(wod_cycle_buffer_t* cycle,wod_cycle_pair_t * pair)
 {
@@ -77,7 +89,6 @@ wod_cycle_buffer_get_used(wod_cycle_buffer_t* cycle,wod_cycle_pair_t * pair)
 			pair->second.sz = 0;
 		}
 	}
-	pair->cutbuf = NULL;
 	return 0;
 }
 int
