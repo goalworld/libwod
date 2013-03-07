@@ -12,11 +12,11 @@
 #define HASH_SIZE 32
 #define SLEEP 10000000
 struct wod_event_pollor{
-	int (*new)(wod_event_t * loop,int flag);
-	void (*delete)(wod_event_t *loop);
-	int (*add)(wod_event_t *loop,int fd,int mask);
-	int	(*remove)(wod_event_t *loop , int fd,int mask);
-	int (*poll)(wod_event_t *loop,long long timeOut);
+	int (*new)		( wod_event_t * loop, int flag );
+	void (*delete)	( wod_event_t *loop );
+	int (*add)		( wod_event_t *loop, int fd,int mask );
+	int	(*remove)	( wod_event_t *loop, int fd,int mask );
+	int (*poll)		( wod_event_t *loop, long long timeOut );
 };
 typedef struct  wod_event_time wod_event_time_t;
 struct wod_event_time{
