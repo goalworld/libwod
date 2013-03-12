@@ -25,7 +25,7 @@ const char * inet_ntop(
 	char *strptr,
 	size_t len//INET_ADDRSTRLEN(16) INET6_ADDRSTRLEN(46)
 );//NULL error 
-*/
+ */
 #define SA struct sockaddr 
 static int 
 _get_addr(enum wodNetTCP et,const char *ip,short port,SA **outaddr,size_t *len,int *fam)
@@ -141,40 +141,78 @@ int
 wod_net_writev(wod_socket_t fd,struct wod_socket_buf *bufs,size_t bufslen)
 {
 	int nw;
+	int allwrite = 0;
+	int alllen = 0;
+	int i=0;
+	for(i=0;i<bufslen;i++){
+		alllen+=bufs[i].b_sz;
+	}
 	for(;;){
 		if((nw = writev(fd,(struct iovec*)bufs,bufslen)) < 0){
 			if(errno == EINTR) continue;
-			nw = -errno;
+			else if(allwrite > 0){
+				return allwrite;
+			}else{
+				return nw;
+			}
+		}else if(nw == 0){
+			return allwrite;
 		}
-		break;
+		allwrite+=nw;
+		if(allwrite == alllen){
+			return allwrite;
+		}
 	}
-	return nw;
+	return allwrite;
 }
 int  
 wod_net_write(wod_socket_t fd,void *buf,size_t sz)
 {
 	int nw;
+	int allwrite = 0;
 	for(;;){
 		if((nw = write(fd,buf,sz)) < 0){
 			if(errno == EINTR) continue;
-			nw = -errno;
+			else if(allwrite > 0){
+				return allwrite;
+			}else{
+				return nw;
+			}
+		}else if(nw == 0){
+			return allwrite;
 		}
-		break;
+		allwrite+=nw;
+		if(allwrite == sz){
+			return allwrite;
+		}
 	}
-	return nw;
+	return allwrite;
 }
 int  
 wod_net_readv(wod_socket_t fd,struct wod_socket_buf *bufs,size_t bufslen)
 {
 	int nr;
-	for(;;){
-		if((nr = readv(fd,(struct iovec*)bufs,bufslen)) < 0){
-			if(errno == EINTR) continue;
-			nr = -errno;
-		}
-		break;
+	int allread = 0;
+	int alllen = 0;
+	int i=0;
+	for(i=0;i<bufslen;i++){
+		alllen+=bufs[i].b_sz;
 	}
-	return nr;
+	for(;;){
+		if((nr = readv(fd,(struct iovec*)bufs,bufslen)) <= 0){
+			if(nr < 0 && errno == EINTR) continue;
+			else if(allread > 0){
+				return allread;
+			}else{
+				return nr;
+			}
+		}
+		allread+=nr;
+		if(alllen == allread){
+			return allread;
+		}
+	}
+	return allread;
 }
 int  
 wod_net_read_full(wod_socket_t fd,void *buf,size_t sz)
@@ -185,12 +223,20 @@ int
 wod_net_read(wod_socket_t fd,void *buf,size_t sz)
 {
 	int nr;
+	int allread = 0;
 	for(;;){
-		if((nr = read(fd,buf,sz)) < 0){
-			if(errno == EINTR)continue;
-			nr = -errno;
+		if((nr = read(fd,buf,sz)) <= 0){
+			if(nr < 0 && errno == EINTR)continue;
+			else if(allread >0){
+				return allread;
+			}else{
+				return nr;
+			}
 		}
-		break;
+		allread+=nr;
+		if(allread == sz){
+			return allread;
+		}
 	}
 	return nr;
 }
@@ -213,11 +259,11 @@ wod_net_noblock(wod_socket_t fd,int flag)
 	}else{
 		oflag &= (~O_NONBLOCK);
 	}
-    
-    if( fcntl(fd, F_SETFL, oflag) < 0){
-    	return -errno;
-    }
-    return 0;
+
+	if( fcntl(fd, F_SETFL, oflag) < 0){
+		return -errno;
+	}
+	return 0;
 }
 int  
 wod_net_keep_alive(wod_socket_t fd,int flag)

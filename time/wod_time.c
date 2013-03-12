@@ -12,5 +12,8 @@ wod_time_usecond()
 void
 wod_usleep(wod_i64_t usec)
 {
-	usleep(usec);
+	struct timeval time;
+	time.tv_sec = usec/1000000;
+	time.tv_usec = usec%1000000;
+	select(0,NULL,NULL,NULL,&time);
 }

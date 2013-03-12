@@ -74,16 +74,21 @@ int
 wod_cycle_buffer_get_used(wod_cycle_buffer_t* cycle,wod_cycle_pair_t * pair)
 {
 	if(cycle->head == cycle->tail){
+		if(pair){
+			memset(pair,0,sizeof(wod_cycle_pair_t));
+		}
 		return -1;
 	}
 	if(pair){
 		if(cycle->head > cycle->tail){
 			pair->first.buf = cycle->buf+cycle->head;
+			assert(cycle->cap >cycle->head );
 			pair->first.sz = cycle->cap - cycle->head;
 			pair->second.buf = cycle->buf;
 			pair->second.sz = cycle->tail;
 		}else{
 			pair->first.buf = cycle->buf+cycle->head;
+			assert(cycle->tail >=cycle->head );
 			pair->first.sz = cycle->tail - cycle->head;
 			pair->second.buf = NULL;
 			pair->second.sz = 0;
@@ -177,7 +182,7 @@ wod_cycle_buffer_empty( wod_cycle_buffer_t* cycle )
 int
 wod_cycle_pair_readsz(wod_cycle_pair_t * pair,void *buf,size_t sz)
 {
-	int all = wod_cycle_pair_sz(pair);
+	size_t all = wod_cycle_pair_sz(pair);
 	if(all < sz){
 		return -1;
 	}
