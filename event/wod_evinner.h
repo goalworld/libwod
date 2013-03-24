@@ -8,7 +8,9 @@
 #ifndef WODEV_INNER_H_
 #define WODEV_INNER_H_
 #include "../include/wod_event.h"
+#include "wod_errno.h"
 #define HASH_SIZE 32
+<<<<<<< HEAD:event/evinner.h
 #define SLEEP 10000000
 struct wod_event_main;
 struct wod_event_pollor
@@ -21,6 +23,18 @@ struct wod_event_pollor
 };
 struct wod_event_time
 {
+=======
+#define SLEEP 1000000
+struct wod_event_pollor{
+	int (*new)		( wod_event_t * loop, int flag );
+	void (*delete)	( wod_event_t *loop );
+	int (*add)		( wod_event_t *loop, int fd,int mask );
+	int	(*remove)	( wod_event_t *loop, int fd,int mask );
+	int (*poll)		( wod_event_t *loop, long long timeOut );
+};
+typedef struct  wod_event_time wod_event_time_t;
+struct wod_event_time{
+>>>>>>> 58eb921e629e090962a4022f193227ae241864b3:event/wod_evinner.h
 	int id;
 	wod_event_time_fn timeProc;
 	void * timeArg;
@@ -31,8 +45,13 @@ struct wod_event_time
 	int repetTims;
 	struct wod_event_time *next;
 };
+<<<<<<< HEAD:event/evinner.h
 struct wod_event_io
 {
+=======
+typedef struct  wod_event_io wod_event_io_t;
+struct wod_event_io{
+>>>>>>> 58eb921e629e090962a4022f193227ae241864b3:event/wod_evinner.h
 	int fd;
 	wod_event_io_fn readProc;
 	void * readArg;
@@ -41,8 +60,20 @@ struct wod_event_io
 	int event;//WV_NONE
 	int revent;//WV_NONE
 };
+<<<<<<< HEAD:event/evinner.h
 struct wod_event_main
 {
+=======
+typedef struct wod_event_userdef wod_event_userdef_t;
+struct wod_event_userdef{
+	int id;
+	wod_event_userdef_fn idluceProc;
+	int dispose;
+	void * userdefArg;
+	struct wod_event_userdef * next;
+};
+struct wod_event{
+>>>>>>> 58eb921e629e090962a4022f193227ae241864b3:event/wod_evinner.h
 	struct wod_event_pollor pollor;
 	void * pollorData;
 	int isQuit;

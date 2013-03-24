@@ -5,36 +5,36 @@
  *      Author: Administrator
  */
 
-#include "evinner.h"
+#include "wod_evinner.h"
 #include <errno.h>
 #include <sys/select.h>
 #include <assert.h>
-typedef struct selectData{
+typedef struct selete_data{
 	int maxfd;
 	fd_set rset;
 	fd_set wset;
-}selectData;
+}selete_data_t;
 static int
-select_new(struct wod_event_main * loop,int flag)
+select_new(wod_event_t * loop,int flag)
 {
-	selectData * p = malloc(sizeof(selectData));
+	selete_data_t * p = malloc(sizeof(selete_data_t));
 	assert(p);
 	p->maxfd = 0;
 	FD_ZERO(&p->rset);
 	FD_ZERO(&p->wset);
 	loop->pollorData = p;
-	return WV_ROK;
+	return WOD_OK;
 }
 static void
-select_delete(struct wod_event_main *loop)
+select_delete(wod_event_t *loop)
 {
 	free(loop->pollorData);
 	return ;
 }
 static int
-select_add(struct wod_event_main *loop,int fd,int mask)
+select_add(wod_event_t *loop,int fd,int mask)
 {
-	selectData * p = (selectData *)loop->pollorData;
+	selete_data_t * p = (selete_data_t *)loop->pollorData;
 	if(fd > p->maxfd){
 		p->maxfd = fd;
 	}
@@ -43,12 +43,12 @@ select_add(struct wod_event_main *loop,int fd,int mask)
 	FD_CLR(fd,&p->wset);
 	if( mask & WV_IO_READ )FD_SET(fd,&p->rset);
 	if( mask & WV_IO_WRITE )FD_SET(fd,&p->wset);
-	return WV_ROK;
+	return WOD_OK;
 }
 static int
-select_remove(struct wod_event_main *loop , int fd,int mask)
+select_remove(wod_event_t *loop , int fd,int mask)
 {
-	selectData * p = (selectData *)loop->pollorData;
+	selete_data_t * p = (selete_data_t *)loop->pollorData;
 	mask =(loop->files[fd].event & (~mask));
 	FD_CLR(fd,&p->rset);
 	FD_CLR(fd,&p->rset);
@@ -61,12 +61,12 @@ select_remove(struct wod_event_main *loop , int fd,int mask)
 			if(pio->event != WV_NONE) p->maxfd = pio->fd;
 		}
 	}
-	return WV_ROK;
+	return WOD_OK;
 }
 static int
-select_poll(struct wod_event_main *loop,long long timeOut)
+select_poll(wod_event_t *loop,long long timeOut)
 {
-	selectData * p = (selectData *)loop->pollorData;
+	selete_data_t * p = (selete_data_t *)loop->pollorData;
 	fd_set rset,wset;
 	rset = p->rset;
 	wset = p->wset;
@@ -80,11 +80,11 @@ select_poll(struct wod_event_main *loop,long long timeOut)
 	case -1:return -errno;
 	}
 	for(;i < max;i++){
-		struct wod_event_io * pio = &loop->files[i];
+		wod_event_io_t * pio = &loop->files[i];
 		if(pio->event == WV_NONE) continue;
 		pio->revent = WV_NONE;
-		if(pio->event& WV_IO_READ && FD_ISSET(pio->fd,&rset))	pio->revent |= WV_IO_READ;
-		if(pio->event& WV_IO_WRITE && FD_ISSET(pio->fd,&wset))	pio->revent |= WV_IO_WRITE;
+		if( (pio->event & WV_IO_READ) && FD_ISSET(pio->fd,&rset))	pio->revent |= WV_IO_READ;
+		if((pio->event& WV_IO_WRITE) && FD_ISSET(pio->fd,&wset))	pio->revent |= WV_IO_WRITE;
 		if(pio->revent != WV_NONE) 		loop->pendFds[numele++] = pio->fd;
 	}
 	return numele;

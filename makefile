@@ -1,9 +1,10 @@
 BUILD=./build/
 INC_DIR=-I./include
 LIB_DIR=-L./build
+CFLAGS=-Wall -O -g
 SHARED=-fPIC -shared
 CC = gcc
-all : $(BUILD)libwod.so $(BUILD)test_netev $(BUILD)test_echo $(BUILD)test_array $(BUILD)test_hashmap $(BUILD)test_cli
+all : $(BUILD)libwod.so $(BUILD)test_netev $(BUILD)test_echo $(BUILD)test_array $(BUILD)test_hashmap $(BUILD)test_cli $(BUILD)cyclebuf_test
 
 install:
 	cp ./include/*  /usr/include
@@ -18,10 +19,14 @@ SRCS=./container/wod_array.c \
 				./container/wod_queue.c \
 				./event/wod_event.c \
 				./net/wod_net_unix.c\
-				./time/wod_time.c
+				./time/wod_time.c\
+				./thread/unix/wod_thread.c\
+				./thread/unix/wod_mutex_cond.c\
+				./thread/unix/wod_rwlock.c
 $(BUILD)libwod.so : $(SRCS)
-			$(CC) $(CFLAGS) $(INC_DIR) $(SHARED) -o $@ $^ 
-			
+			$(CC) $(CFLAGS) $(INC_DIR) $(SHARED) -o $@ $^  -lpthread
+$(BUILD)cyclebuf_test:./test/cyclebuf_test.c
+			$(CC) $(CFLAGS) $(INC_DIR) -o $@ $^ -lwod $(LIB_DIR)
 $(BUILD)test_netev:./test/netev_test.c
 			$(CC) $(CFLAGS) $(INC_DIR) -o $@ $^ -lwod $(LIB_DIR)
 $(BUILD)test_echo:  ./test/net_test.c

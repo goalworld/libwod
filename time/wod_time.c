@@ -1,22 +1,19 @@
 #include "wod_time.h"
-#include <unistd.h>
 #include <sys/time.h>
-long long
+#include <stddef.h>
+#include <unistd.h>
+wod_i64_t
 wod_time_usecond()
 {
 	struct timeval time;
 	gettimeofday(&time,NULL);
 	return time.tv_sec*1000000 + time.tv_usec;
 }
-
 void
-wod_time_sleep_usecond(long long usec)
+wod_usleep(wod_i64_t usec)
 {
-	if( usec <= 0 ){
-		return ;
-	}
-	struct timeval tv;
-	tv.tv_sec = usec/1000000;
-	tv.tv_usec = usec - tv.tv_sec*1000000;
-	select(0,NULL,NULL,NULL,&tv);
+	struct timeval time;
+	time.tv_sec = usec/1000000;
+	time.tv_usec = usec%1000000;
+	select(0,NULL,NULL,NULL,&time);
 }

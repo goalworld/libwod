@@ -4,37 +4,40 @@
  *  Created on: 2012-10-23
  *      Author: goalworld
  */
-#include "wod_config.h"
-#include "evinner.h"
-#include "wod_time.h"
 #include <string.h>
 #include <stdlib.h>
-
 #include <errno.h>
 
+#include "wod_config.h"
+#include "wod_evinner.h"
+#include "wod_time.h"
+#include "wod_errno.h"
 static int _init_pollor(struct wod_event_pollor* pllor,int type);
 
 
 static inline int
-_hashFunction(int id)
+_hash_function(int id)
 {
 	return id%HASH_SIZE;
 }
-struct wod_event_main *
-wod_event_main_new(int set_size,int type)
+wod_ret_t
+wod_event_create(wod_event_t **ev,int set_size,int type)
 {
-	struct wod_event_main * loop = malloc(sizeof(struct wod_event_main));
-	int ret = _init_pollor(&loop->pollor,type);
-	if(ret != WV_ROK){
+	struct wod_event * loop = malloc(sizeof(struct wod_event));
+	if(loop == NULL){
+		return WOD_ENOMEM;
+	}
+	wod_ret_t ret = _init_pollor(&loop->pollor,type);
+	if(ret != WOD_OK){
 		free(loop);
-		return NULL;
+		return ret;
 	}
 	loop->set_size = set_size;
 	loop->idIndex = loop->set_size;
 	ret = loop->pollor.new(loop,0);
-	if(ret != WV_ROK){
+	if(ret != WOD_OK){
 		free(loop);
-		return NULL;
+		return ret;
 	}
 	loop->files = malloc(sizeof(struct wod_event_io) *set_size);
 	loop->pendFds = malloc(sizeof(int) *set_size);
@@ -43,16 +46,17 @@ wod_event_main_new(int set_size,int type)
 	loop->isQuit = 0;
 	loop->used = 0;
 	loop->minSec = SLEEP;
-	return loop;
+	*ev = loop;
+	return WOD_OK;
 }
 void
-wodEvLoopDelete(struct wod_event_main *loop)
+wod_event_destroy(wod_event_t *loop)
 {
 	loop->pollor.delete(loop);
 	free(loop);
 }
 static void
-_processIO(struct wod_event_main *loop)
+_process_IO(wod_event_t *loop)
 {
 	long long tmpsec = loop->minSec;
 	if(loop->minSec > 1000){
@@ -71,10 +75,32 @@ _processIO(struct wod_event_main *loop)
 			}
 		}
 	}else{
-		wod_time_sleep_usecond(tmpsec);
+		wod_usleep(tmpsec);
 	}
 }
+<<<<<<< HEAD
 static void _processTime(struct wod_event_main *loop){
+=======
+static void _process_idle(wod_event_t *loop){
+	struct wod_event_userdef*tmp=loop->userdefHead,*pre = NULL,*next;
+	while(tmp){
+		next = tmp->next;
+		if(!tmp->dispose){
+			tmp->idluceProc(loop,tmp->userdefArg);
+		}else{
+			if(pre){
+				pre->next = next;
+			}else{
+				loop->userdefHead = next;
+			}
+			free(tmp);
+		}
+		pre = tmp;
+		tmp = next;
+	}
+}
+static void _process_time(wod_event_t *loop){
+>>>>>>> 58eb921e629e090962a4022f193227ae241864b3
 	int i =0;
 	loop->minSec = SLEEP;
 	for(i=0;i<HASH_SIZE;i++){
@@ -110,28 +136,41 @@ static void _processTime(struct wod_event_main *loop){
 		}
 	}
 }
+<<<<<<< HEAD
 void wod_event_main_once(struct wod_event_main *loop){
 	_processTime(loop);
 	_processIO(loop);
+=======
+void wod_event_once(wod_event_t *loop){
+	_process_time(loop);
+	_process_idle(loop);
+	_process_IO(loop);
+>>>>>>> 58eb921e629e090962a4022f193227ae241864b3
 }
-void wod_event_main_loop(struct wod_event_main *loop){
+void wod_event_loop(wod_event_t *loop){
 	while(!loop->isQuit){
+<<<<<<< HEAD
 		_processTime(loop);
 		_processIO(loop);
+=======
+		_process_time(loop);
+		_process_idle(loop);
+		_process_IO(loop);
+>>>>>>> 58eb921e629e090962a4022f193227ae241864b3
 	}
 }
-void wod_event_main_stop(struct wod_event_main *loop){
+void wod_event_stop(wod_event_t *loop){
 	loop->isQuit = 1;
 }
 
-int wod_event_io_add(struct wod_event_main *loop,int fd,int event,wod_event_io_fn cb,void *cbArg){
+int wod_event_io_add(wod_event_t *loop,int fd,int event,wod_event_io_fn cb,void *cbArg){
 	if(fd > loop->set_size || fd <= 0 || !cb){
 		return -EINVAL;
 	}
 	struct wod_event_io *pFile = &loop->files[fd];
 	pFile->fd = fd;
 	int ret = loop->pollor.add(loop,fd,event);
-	if(ret != WV_ROK){
+	if(ret != WOD_OK){
 		return ret;
 	}
 	if(pFile->event == WV_NONE){
@@ -149,7 +188,7 @@ int wod_event_io_add(struct wod_event_main *loop,int fd,int event,wod_event_io_f
 
 	return fd;
 }
-void wod_event_io_remove(struct wod_event_main *loop,int id,int event){
+void wod_event_io_remove(wod_event_t *loop,int id,int event){
 	if(id > loop->set_size){
 		return ;
 	}
@@ -163,7 +202,7 @@ void wod_event_io_remove(struct wod_event_main *loop,int id,int event){
 	}
 }
 
-int wod_event_time_add(struct wod_event_main *loop,long long usec,wod_event_time_fn cb,void *cbArg){
+int wod_event_time_add(wod_event_t *loop,long long usec,wod_event_time_fn cb,void *cbArg){
 	if(!cb){
 		return -EINVAL;
 	}
@@ -175,13 +214,13 @@ int wod_event_time_add(struct wod_event_main *loop,long long usec,wod_event_time
 	pTime->timeArg = cbArg;
 	pTime->timeProc = cb;
 	pTime->dispose = 0;
-	int hash = _hashFunction(pTime->id);
+	int hash = _hash_function(pTime->id);
 	pTime->next = loop->hashMap[hash];
 	loop->hashMap[hash] = pTime;
 	return pTime->id;
 }
-void wod_event_time_remove(struct wod_event_main * loop,int id){
-	int hash = _hashFunction(id);
+void wod_event_time_remove(wod_event_t * loop,int id){
+	int hash = _hash_function(id);
 	struct wod_event_time*tmp=loop->hashMap[hash];
 	while(tmp){
 		if(tmp->id == id){
@@ -191,6 +230,32 @@ void wod_event_time_remove(struct wod_event_main * loop,int id){
 	}
 }
 
+<<<<<<< HEAD
+=======
+int wod_event_userdef_add(wod_event_t *loop,wod_event_userdef_fn cb,void *cbArg){
+	if(!cb){
+		return -EINVAL;
+	}
+	struct wod_event_userdef * pIdle = malloc(sizeof(struct wod_event_userdef));
+	pIdle->next = loop->userdefHead;
+	loop->userdefHead  = pIdle;
+	pIdle->id = loop->idIndex++;
+	pIdle->userdefArg = cbArg;
+	pIdle->idluceProc = cb;
+	pIdle->dispose = 0;
+	return pIdle->id;
+}
+void wod_event_userdef_remove(wod_event_t *loop,int id){
+	struct wod_event_userdef*tmp=loop->userdefHead;
+	while(tmp){
+		if(tmp->id == id){
+			tmp->dispose = 1;
+		}
+		tmp = tmp->next;
+	}
+}
+
+>>>>>>> 58eb921e629e090962a4022f193227ae241864b3
 #if HAS_EPOLL
 #include "ev_epoll.c"
 #endif
@@ -204,19 +269,19 @@ static int _init_pollor(struct wod_event_pollor* pllor,int type){
 	if(type == WV_POLL_EPOLL){
 #if HAS_EPOLL
 		SET_POLLER(poller,epoll);
-		return WV_ROK;
+		return WOD_OK;
 #endif
 		return -EINVAL;
 	}else if(type == WV_POLL_SELECT){
 #if HAS_SELECT
 		SET_POLLER(poller,select);
-		return WV_ROK;
+		return WOD_OK;
 #endif
 		return -EINVAL;
 	}else if(type == WV_POLL_POLL){
 #if HAS_POLL
 		SET_POLLER(poller,poll);
-		return WV_ROK;
+		return WOD_OK;
 #endif
 		return -EINVAL;
 	}
