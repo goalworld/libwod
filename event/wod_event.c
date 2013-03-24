@@ -34,14 +34,20 @@ wod_event_create(wod_event_t **ev,int set_size,int type)
 	}
 	loop->set_size = set_size;
 	loop->idIndex = loop->set_size;
+	loop->userdefHead = NULL;
 	ret = loop->pollor.new(loop,0);
 	if(ret != WOD_OK){
 		free(loop);
 		return ret;
 	}
+
+
 	loop->files = malloc(sizeof(struct wod_event_io) *set_size);
 	loop->pendFds = malloc(sizeof(int) *set_size);
-	memset(loop->files,0,set_size *sizeof(struct wod_event_io));
+	int i=0;
+	for(i=0; i< loop->set_size; i++){
+		loop->files[i].event = WV_NONE;
+	}
 	memset(loop->hashMap,0,sizeof(loop->hashMap));
 	loop->isQuit = 0;
 	loop->used = 0;
@@ -78,9 +84,6 @@ _process_IO(wod_event_t *loop)
 		wod_usleep(tmpsec);
 	}
 }
-<<<<<<< HEAD
-static void _processTime(struct wod_event_main *loop){
-=======
 static void _process_idle(wod_event_t *loop){
 	struct wod_event_userdef*tmp=loop->userdefHead,*pre = NULL,*next;
 	while(tmp){
@@ -100,7 +103,6 @@ static void _process_idle(wod_event_t *loop){
 	}
 }
 static void _process_time(wod_event_t *loop){
->>>>>>> 58eb921e629e090962a4022f193227ae241864b3
 	int i =0;
 	loop->minSec = SLEEP;
 	for(i=0;i<HASH_SIZE;i++){
@@ -136,27 +138,16 @@ static void _process_time(wod_event_t *loop){
 		}
 	}
 }
-<<<<<<< HEAD
-void wod_event_main_once(struct wod_event_main *loop){
-	_processTime(loop);
-	_processIO(loop);
-=======
 void wod_event_once(wod_event_t *loop){
 	_process_time(loop);
 	_process_idle(loop);
 	_process_IO(loop);
->>>>>>> 58eb921e629e090962a4022f193227ae241864b3
 }
 void wod_event_loop(wod_event_t *loop){
 	while(!loop->isQuit){
-<<<<<<< HEAD
-		_processTime(loop);
-		_processIO(loop);
-=======
 		_process_time(loop);
 		_process_idle(loop);
 		_process_IO(loop);
->>>>>>> 58eb921e629e090962a4022f193227ae241864b3
 	}
 }
 void wod_event_stop(wod_event_t *loop){
@@ -230,8 +221,6 @@ void wod_event_time_remove(wod_event_t * loop,int id){
 	}
 }
 
-<<<<<<< HEAD
-=======
 int wod_event_userdef_add(wod_event_t *loop,wod_event_userdef_fn cb,void *cbArg){
 	if(!cb){
 		return -EINVAL;
@@ -255,7 +244,6 @@ void wod_event_userdef_remove(wod_event_t *loop,int id){
 	}
 }
 
->>>>>>> 58eb921e629e090962a4022f193227ae241864b3
 #if HAS_EPOLL
 #include "ev_epoll.c"
 #endif
