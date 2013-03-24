@@ -40,7 +40,5 @@ void wod_event_io_remove(struct wod_event_main *,int id,int event);
 int wod_event_io_wait(int fd,int mask,long long timeout);
 int wod_event_time_add(struct wod_event_main *,long long usec,wod_event_time_fn cb,void *cbArg);
 void wod_event_time_remove(struct wod_event_main *,int id);
-int wod_event_userdef_add(struct wod_event_main *,wod_event_userdef_fn cb,void *cbArg);
-void wod_event_userdef_remove(struct wod_event_main *,int id);
 
 #endif /* GODEV_H_ */

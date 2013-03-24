@@ -11,14 +11,16 @@
 #define HASH_SIZE 32
 #define SLEEP 10000000
 struct wod_event_main;
-struct wod_event_pollor{
-	int (*new)(struct wod_event_main * loop,int flag);
-	void (*delete)(struct wod_event_main *loop);
-	int (*add)(struct wod_event_main *loop,int fd,int mask);
-	int	(*remove)(struct wod_event_main *loop , int fd,int mask);
-	int (*poll)(struct wod_event_main *loop,long long timeOut);
+struct wod_event_pollor
+{
+	int (*new)		(struct wod_event_main * loop,int flag);
+	void (*delete)	(struct wod_event_main *loop);
+	int (*add)		(struct wod_event_main *loop,int fd,int mask);
+	int	(*remove)	(struct wod_event_main *loop,int fd,int mask);
+	int (*poll)		(struct wod_event_main *loop,long long timeOut);
 };
-struct wod_event_time{
+struct wod_event_time
+{
 	int id;
 	wod_event_time_fn timeProc;
 	void * timeArg;
@@ -29,7 +31,8 @@ struct wod_event_time{
 	int repetTims;
 	struct wod_event_time *next;
 };
-struct wod_event_io{
+struct wod_event_io
+{
 	int fd;
 	wod_event_io_fn readProc;
 	void * readArg;
@@ -38,14 +41,8 @@ struct wod_event_io{
 	int event;//WV_NONE
 	int revent;//WV_NONE
 };
-struct wod_event_userdef{
-	int id;
-	wod_event_userdef_fn idluceProc;
-	int dispose;
-	void * userdefArg;
-	struct wod_event_userdef * next;
-};
-struct wod_event_main{
+struct wod_event_main
+{
 	struct wod_event_pollor pollor;
 	void * pollorData;
 	int isQuit;
@@ -53,9 +50,8 @@ struct wod_event_main{
 	struct wod_event_io * files;
 	int *pendFds;
 	int idIndex;
-	struct wod_event_userdef * userdefHead;
-	struct wod_event_time* hashMap[HASH_SIZE];
 	int used;
+	struct wod_event_time* hashMap[HASH_SIZE];
 	long long minSec;
 	long long preSec;
 };
