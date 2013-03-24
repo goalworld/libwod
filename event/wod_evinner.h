@@ -40,14 +40,6 @@ struct wod_event_io{
 	int event;//WV_NONE
 	int revent;//WV_NONE
 };
-typedef struct wod_event_userdef wod_event_userdef_t;
-struct wod_event_userdef{
-	int id;
-	wod_event_userdef_fn idluceProc;
-	int dispose;
-	void * userdefArg;
-	struct wod_event_userdef * next;
-};
 struct wod_event{
 	struct wod_event_pollor pollor;
 	void * pollorData;
@@ -56,9 +48,8 @@ struct wod_event{
 	struct wod_event_io * files;
 	int *pendFds;
 	int idIndex;
-	struct wod_event_userdef * userdefHead;
-	struct wod_event_time* hashMap[HASH_SIZE];
 	int used;
+	struct wod_event_time* hashMap[HASH_SIZE];
 	long long minSec;
 	long long preSec;
 };

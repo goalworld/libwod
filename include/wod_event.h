@@ -36,7 +36,4 @@ void wod_event_io_remove(wod_event_t *,int id,int event);
 int wod_event_time_add(wod_event_t *,long long usec,wod_event_time_fn cb,void *cbArg);
 void wod_event_time_remove(wod_event_t *,int id);
 
-int wod_event_userdef_add(wod_event_t *,wod_event_userdef_fn cb,void *cbArg);
-void wod_event_userdef_remove(wod_event_t *,int id);
-
 #endif /* GODEV_H_ */

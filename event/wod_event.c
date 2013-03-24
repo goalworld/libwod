@@ -34,20 +34,18 @@ wod_event_create(wod_event_t **ev,int set_size,int type)
 	}
 	loop->set_size = set_size;
 	loop->idIndex = loop->set_size;
-	loop->userdefHead = NULL;
 	ret = loop->pollor.new(loop,0);
 	if(ret != WOD_OK){
 		free(loop);
 		return ret;
 	}
-
-
 	loop->files = malloc(sizeof(struct wod_event_io) *set_size);
 	loop->pendFds = malloc(sizeof(int) *set_size);
 	int i=0;
 	for(i=0; i< loop->set_size; i++){
 		loop->files[i].event = WV_NONE;
 	}
+	memset(loop->files,0,sizeof(struct wod_event_io) *set_size);
 	memset(loop->hashMap,0,sizeof(loop->hashMap));
 	loop->isQuit = 0;
 	loop->used = 0;
@@ -82,24 +80,6 @@ _process_IO(wod_event_t *loop)
 		}
 	}else{
 		wod_usleep(tmpsec);
-	}
-}
-static void _process_idle(wod_event_t *loop){
-	struct wod_event_userdef*tmp=loop->userdefHead,*pre = NULL,*next;
-	while(tmp){
-		next = tmp->next;
-		if(!tmp->dispose){
-			tmp->idluceProc(loop,tmp->userdefArg);
-		}else{
-			if(pre){
-				pre->next = next;
-			}else{
-				loop->userdefHead = next;
-			}
-			free(tmp);
-		}
-		pre = tmp;
-		tmp = next;
 	}
 }
 static void _process_time(wod_event_t *loop){
@@ -140,13 +120,11 @@ static void _process_time(wod_event_t *loop){
 }
 void wod_event_once(wod_event_t *loop){
 	_process_time(loop);
-	_process_idle(loop);
 	_process_IO(loop);
 }
 void wod_event_loop(wod_event_t *loop){
 	while(!loop->isQuit){
 		_process_time(loop);
-		_process_idle(loop);
 		_process_IO(loop);
 	}
 }
@@ -213,29 +191,6 @@ int wod_event_time_add(wod_event_t *loop,long long usec,wod_event_time_fn cb,voi
 void wod_event_time_remove(wod_event_t * loop,int id){
 	int hash = _hash_function(id);
 	struct wod_event_time*tmp=loop->hashMap[hash];
-	while(tmp){
-		if(tmp->id == id){
-			tmp->dispose = 1;
-		}
-		tmp = tmp->next;
-	}
-}
-
-int wod_event_userdef_add(wod_event_t *loop,wod_event_userdef_fn cb,void *cbArg){
-	if(!cb){
-		return -EINVAL;
-	}
-	struct wod_event_userdef * pIdle = malloc(sizeof(struct wod_event_userdef));
-	pIdle->next = loop->userdefHead;
-	loop->userdefHead  = pIdle;
-	pIdle->id = loop->idIndex++;
-	pIdle->userdefArg = cbArg;
-	pIdle->idluceProc = cb;
-	pIdle->dispose = 0;
-	return pIdle->id;
-}
-void wod_event_userdef_remove(wod_event_t *loop,int id){
-	struct wod_event_userdef*tmp=loop->userdefHead;
 	while(tmp){
 		if(tmp->id == id){
 			tmp->dispose = 1;
